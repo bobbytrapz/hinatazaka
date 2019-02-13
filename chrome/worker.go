@@ -173,8 +173,6 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time) error 
 	// include the given date
 	since = since.AddDate(0, 0, -1)
 
-	var rw sync.RWMutex
-
 	// spider
 	tab, err := ConnectToNewTab(ctx)
 	if err != nil {
@@ -200,18 +198,14 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time) error 
 				return
 			case link := <-visit:
 				// check visited
-				rw.RLock()
 				_, ok := visited[link]
-				rw.RUnlock()
 				if ok {
 					continue
 				}
 
 				// save visit
-				rw.Lock()
 				fmt.Println("[visit]", link)
 				visited[link] = true
-				rw.Unlock()
 
 				// we found a page so reset timeout
 				if timeout.Stop() {
