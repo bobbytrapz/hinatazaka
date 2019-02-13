@@ -39,6 +39,12 @@ var blogCmd = &cobra.Command{
 			return nil
 		}
 
+		if saveBlogsSince == "forever" {
+			// save all blogs since forever
+			since = time.Time{}
+			return nil
+		}
+
 		since, err = time.Parse("2006-01-02", saveBlogsSince)
 		if err != nil {
 			return err
