@@ -30,6 +30,12 @@ Download Kyoko and Kageyama's blogs since Independence Day:
 hinatazaka blog kyoko kagechan --since 2019-02-11
 ```
 
+Archive Iguchi's blog:
+
+```
+hinatazaka blog iguchi --since forever
+```
+
 Blog and images to \$HOME/hinatazaka by default. You can change this in the options ~/.config/hinatazaka/options.toml
 
 The blog is a pdf and all the images are saved in a directory according to the date the blog was posted.
