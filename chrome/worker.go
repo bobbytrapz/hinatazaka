@@ -181,6 +181,8 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time) error 
 		return fmt.Errorf("chrome.SaveAllBlogsSince: %s", err)
 	}
 	count := 0
+	spiderTimeout := time.Duration(WorkerDelay) * time.Second
+	timeout := time.NewTimer(spiderTimeout)
 	go func() {
 		defer tab.PageClose()
 		defer close(jobs)
@@ -190,13 +192,35 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time) error 
 				return
 			case <-done:
 				return
+			case <-timeout.C:
+				// dumb way to stop searching for blogs
+				// use a timeout to decide when done
+				// or to just stop if we have network issues
+				Log("chrome.SaveAllBlogsSince: timeout since we found nothing")
+				return
 			case link := <-visit:
+				// check visited
+				rw.RLock()
+				_, ok := visited[link]
+				rw.RUnlock()
+				if ok {
+					continue
+				}
+
+				// save visit
+				rw.Lock()
+				fmt.Println("[visit]", link)
+				visited[link] = true
+				rw.Unlock()
+
+				// we found a page so reset timeout
+				if timeout.Stop() {
+					timeout.Reset(spiderTimeout)
+				}
+
 				// get list of blogs
 				tab.PageNavigate(link)
 				tab.WaitForLoad()
-				rw.Lock()
-				visited[link] = true
-				rw.Unlock()
 				res := tab.Blogs()
 				for _, b := range res.Blogs {
 					// the blogs are found in reverse chronological order so
@@ -211,19 +235,10 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time) error 
 					count++
 				}
 				// read pages
-				wasNewPage := false
 				for _, page := range res.Pages {
-					rw.RLock()
-					if _, ok := visited[page]; !ok {
-						visit <- page
-						wasNewPage = true
-					}
-					rw.RUnlock()
-				}
-				// if we found no new pages then we are done
-				if !wasNewPage {
-					Log("chrome.SaveAllBlogsSince: found nothing new")
-					close(done)
+					go func(p string) {
+						visit <- p
+					}(page)
 				}
 			}
 		}
