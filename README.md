@@ -2,7 +2,7 @@ A collection of hinatazaka command-line tools. Requires Google Chrome.
 
 This is just a toy project I'm using to check out remote controlling Chrome DevTools.
 
-Currently unstable. Not all the members have been added yet.
+Currently not well tested but I'm using it.
 
 There is no support for Windows but there probably will be eventually.
 
