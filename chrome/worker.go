@@ -5,14 +5,23 @@ import (
 	"crypto/sha1"
 	"encoding/base32"
 	"fmt"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
 )
 
+func init() {
+	rand.Seed(time.Now().Unix())
+}
+
 // NumTabWorkersPerMember determines how many blogs we download at once
 var NumTabWorkersPerMember = 8
+
+// WorkerDelay is how long in seconds a worker waits before reentering the pool
+// a bit random though
+var WorkerDelay = 30
 
 // TabJob is a job for a TabWorker
 type TabJob struct {
@@ -103,6 +112,10 @@ func NewTabWorkers(ctx context.Context, N int) (tw *TabWorkers) {
 					w.tab.SaveBlog(ctx, b.Link, saveBlogAs, saveImagesTo)
 					tw.wg.Done()
 				}
+
+				// wait a bit to be nice
+				waitABit := WorkerDelay/2 + rand.Intn(WorkerDelay)
+				<-time.After(time.Duration(waitABit) * time.Second)
 			}
 		}(newWorker)
 
