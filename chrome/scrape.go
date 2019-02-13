@@ -127,13 +127,13 @@ func (t Tab) Blogs() (blogs ResJSBlog) {
 		Log("chrome.Tab.Blogs: %s", err)
 		return
 	}
-	Log("chrome.Tab.Blogs: res: %+v", blogs)
 
 	err = json.Unmarshal([]byte(res.Result.Value), &blogs)
 	if err != nil {
 		Log("chrome.Tab.Blogs: %s", err)
 		return
 	}
+	Log("chrome.Tab.Blogs: res: %+v", blogs)
 
 	return
 }
