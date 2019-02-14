@@ -27,6 +27,7 @@ var lookup = map[string]string{
 	"松田好花":  "http://www.keyakizaka46.com/s/k46o/diary/member/list?ima=0000&ct=40",
 	"宮田愛萌":  "http://www.keyakizaka46.com/s/k46o/diary/member/list?ima=0000&ct=41",
 	"渡邉美穂":  "http://www.keyakizaka46.com/s/k46o/diary/member/list?ima=0000&ct=42",
+	"上村ひなの": "http://www.keyakizaka46.com/s/k46o/diary/member/list?ima=0000&ct=52",
 }
 
 func init() {
@@ -111,6 +112,11 @@ func init() {
 
 	lookup["watanabe"] = lookup["渡邉美穂"]
 	lookup["miho"] = lookup["渡邉美穂"]
+
+	lookup["kamimura"] = lookup["上村ひなの"]
+	lookup["hinano"] = lookup["上村ひなの"]
+	lookup["hinanonano"] = lookup["上村ひなの"]
+	lookup["nano"] = lookup["上村ひなの"]
 }
 
 // GetBlogURL of a member by name or nickname
