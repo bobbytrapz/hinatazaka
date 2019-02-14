@@ -117,6 +117,7 @@ func init() {
 	lookup["hinano"] = lookup["上村ひなの"]
 	lookup["hinanonano"] = lookup["上村ひなの"]
 	lookup["nano"] = lookup["上村ひなの"]
+	lookup["ひなの"] = lookup["上村ひなの"]
 }
 
 // GetBlogURL of a member by name or nickname
