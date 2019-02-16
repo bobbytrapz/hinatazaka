@@ -73,12 +73,25 @@ var blogCmd = &cobra.Command{
 
 		// chrome.DumpProtocol()
 
+		// unique args
+		uniqueArgs := map[string]bool{}
+		for _, a := range args {
+			if a == "all" {
+				for m := range members.Blog {
+					uniqueArgs[m] = true
+				}
+				break
+			}
+			addArg := members.RealName(a)
+			uniqueArgs[addArg] = true
+		}
+
 		var wg sync.WaitGroup
-		for _, member := range args {
+		for member := range uniqueArgs {
 			wg.Add(1)
 			go func(m string) {
 				defer wg.Done()
-				link := members.GetBlogURL(m)
+				link := members.BlogURL(m)
 				if link == "" {
 					fmt.Printf("We do not know who %q is.\n", m)
 					return

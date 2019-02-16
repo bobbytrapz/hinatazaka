@@ -4,9 +4,10 @@ import (
 	"strings"
 )
 
+// Blog maps names to blog list links
 // todo: update
 // they have not moved to hinatazaka46.com yet
-var lookup = map[string]string{
+var Blog = map[string]string{
 	"井口眞緒":  "https://www.keyakizaka46.com/s/k46o/diary/member/list?ima=0000&ct=23",
 	"潮紗理菜":  "http://www.keyakizaka46.com/s/k46o/diary/member/list?ima=0000&ct=24",
 	"柿崎芽実":  "http://www.keyakizaka46.com/s/k46o/diary/member/list?ima=0000&ct=25",
@@ -30,97 +31,106 @@ var lookup = map[string]string{
 	"上村ひなの": "http://www.keyakizaka46.com/s/k46o/diary/member/list?ima=0000&ct=52",
 }
 
-func init() {
-	lookup["iguchi"] = lookup["井口眞緒"]
-	lookup["mao"] = lookup["井口眞緒"]
+// nicknames of members
+var nicknames = map[string]string{
+	"iguchi": "井口眞緒",
+	"mao":    "井口眞緒",
 
-	lookup["ushio"] = lookup["潮紗理菜"]
-	lookup["sarina"] = lookup["潮紗理菜"]
+	"ushio":  "潮紗理菜",
+	"sarina": "潮紗理菜",
 
-	lookup["kakizaki"] = lookup["柿崎芽実"]
-	lookup["memi"] = lookup["柿崎芽実"]
+	"kakizaki": "柿崎芽実",
+	"memi":     "柿崎芽実",
 
-	lookup["kageyama"] = lookup["影山優佳"]
-	lookup["yuuka"] = lookup["影山優佳"]
-	lookup["kage"] = lookup["影山優佳"]
-	lookup["kagechan"] = lookup["影山優佳"]
-	lookup["影ちゃん"] = lookup["影山優佳"]
+	"kageyama": "影山優佳",
+	"yuuka":    "影山優佳",
+	"kage":     "影山優佳",
+	"kagechan": "影山優佳",
+	"影ちゃん":     "影山優佳",
 
-	lookup["kato"] = lookup["加藤史帆"]
-	lookup["shiho"] = lookup["加藤史帆"]
-	lookup["katoshi"] = lookup["加藤史帆"]
+	"kato":    "加藤史帆",
+	"shiho":   "加藤史帆",
+	"katoshi": "加藤史帆",
 
-	lookup["きょんこ"] = lookup["齊藤京子"]
-	lookup["キョンこ"] = lookup["齊藤京子"]
-	lookup["さいきょー"] = lookup["齊藤京子"]
-	lookup["ラーメン"] = lookup["齊藤京子"]
-	lookup["saito kyoko"] = lookup["齊藤京子"]
-	lookup["kyoko"] = lookup["齊藤京子"]
-	lookup["kyonko"] = lookup["齊藤京子"]
-	lookup["saikyo"] = lookup["齊藤京子"]
-	lookup["ramen"] = lookup["齊藤京子"]
+	"きょんこ":        "齊藤京子",
+	"キョンこ":        "齊藤京子",
+	"さいきょー":       "齊藤京子",
+	"ラーメン":        "齊藤京子",
+	"saito kyoko": "齊藤京子",
+	"kyoko":       "齊藤京子",
+	"kyonko":      "齊藤京子",
+	"saikyo":      "齊藤京子",
+	"ramen":       "齊藤京子",
 
-	lookup["sasaki"] = lookup["佐々木久美"]
-	lookup["kumi"] = lookup["佐々木久美"]
-	lookup["captain"] = lookup["佐々木久美"]
+	"kumi":    "佐々木久美",
+	"captain": "佐々木久美",
 
-	lookup["sasaki"] = lookup["佐々木美玲"]
-	lookup["mirei"] = lookup["佐々木美玲"]
-	lookup["miipan"] = lookup["佐々木美玲"]
+	"mirei":  "佐々木美玲",
+	"miipan": "佐々木美玲",
 
-	lookup["takase"] = lookup["高瀬愛奈"]
-	lookup["mana"] = lookup["高瀬愛奈"]
-	lookup["manafi"] = lookup["高瀬愛奈"]
+	"takase": "高瀬愛奈",
+	"mana":   "高瀬愛奈",
+	"manafi": "高瀬愛奈",
 
-	lookup["takamoto"] = lookup["高本彩花"]
-	lookup["ayaka"] = lookup["高本彩花"]
-	lookup["otake"] = lookup["高本彩花"]
-	lookup["おたけ"] = lookup["高本彩花"]
+	"takamoto": "高本彩花",
+	"ayaka":    "高本彩花",
+	"otake":    "高本彩花",
+	"おたけ":      "高本彩花",
 
-	lookup["higashimura"] = lookup["東村芽依"]
-	lookup["mei"] = lookup["東村芽依"]
-	lookup["meimei"] = lookup["東村芽依"]
+	"higashimura": "東村芽依",
+	"mei":         "東村芽依",
+	"meimei":      "東村芽依",
 
-	lookup["kanemura"] = lookup["金村美玖"]
-	lookup["miku"] = lookup["金村美玖"]
-	lookup["sushi"] = lookup["金村美玖"]
+	"kanemura": "金村美玖",
+	"miku":     "金村美玖",
+	"sushi":    "金村美玖",
 
-	lookup["kawata"] = lookup["河田陽菜"]
-	lookup["hina"] = lookup["河田陽菜"]
+	"kawata": "河田陽菜",
+	"hina":   "河田陽菜",
 
-	lookup["kosaka"] = lookup["小坂菜緒"]
-	lookup["nao"] = lookup["小坂菜緒"]
+	"kosaka": "小坂菜緒",
+	"nao":    "小坂菜緒",
 
-	lookup["tomita"] = lookup["富田鈴花"]
-	lookup["suzuka"] = lookup["富田鈴花"]
-	lookup["paripi"] = lookup["富田鈴花"]
-	lookup["パリピ"] = lookup["富田鈴花"]
+	"tomita": "富田鈴花",
+	"suzuka": "富田鈴花",
+	"paripi": "富田鈴花",
+	"パリピ":    "富田鈴花",
 
-	lookup["nibu"] = lookup["丹生明里"]
-	lookup["akari"] = lookup["丹生明里"]
+	"nibu":  "丹生明里",
+	"akari": "丹生明里",
 
-	lookup["hamagishi"] = lookup["濱岸ひより"]
-	lookup["hiyori"] = lookup["濱岸ひより"]
-	lookup["hiyotan"] = lookup["濱岸ひより"]
-	lookup["ひよたん"] = lookup["濱岸ひより"]
+	"hamagishi": "濱岸ひより",
+	"hiyori":    "濱岸ひより",
+	"hiyotan":   "濱岸ひより",
+	"ひよたん":      "濱岸ひより",
 
-	lookup["matsuda"] = lookup["松田好花"]
-	lookup["konoka"] = lookup["松田好花"]
+	"matsuda": "松田好花",
+	"konoka":  "松田好花",
 
-	lookup["miyata"] = lookup["宮田愛萌"]
-	lookup["manamo"] = lookup["宮田愛萌"]
+	"miyata": "宮田愛萌",
+	"manamo": "宮田愛萌",
 
-	lookup["watanabe"] = lookup["渡邉美穂"]
-	lookup["miho"] = lookup["渡邉美穂"]
+	"watanabe": "渡邉美穂",
+	"miho":     "渡邉美穂",
 
-	lookup["kamimura"] = lookup["上村ひなの"]
-	lookup["hinano"] = lookup["上村ひなの"]
-	lookup["hinanonano"] = lookup["上村ひなの"]
-	lookup["nano"] = lookup["上村ひなの"]
-	lookup["ひなの"] = lookup["上村ひなの"]
+	"kamimura":   "上村ひなの",
+	"hinano":     "上村ひなの",
+	"hinanonano": "上村ひなの",
+	"nano":       "上村ひなの",
+	"ひなの":        "上村ひなの",
 }
 
-// GetBlogURL of a member by name or nickname
-func GetBlogURL(name string) string {
-	return lookup[strings.ToLower(name)]
+// RealName provides the real name of a member
+func RealName(name string) string {
+	name = strings.ToLower(name)
+	if realname, ok := nicknames[name]; ok {
+		// name is a nickname so use real name
+		return realname
+	}
+	return name
+}
+
+// BlogURL of a member by name or nickname
+func BlogURL(name string) string {
+	return Blog[RealName(name)]
 }
