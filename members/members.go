@@ -35,6 +35,8 @@ var Blog = map[string]string{
 var nicknames = map[string]string{
 	"iguchi": "井口眞緒",
 	"mao":    "井口眞緒",
+	"mama":   "井口眞緒",
+	"ママ":  "井口眞緒",
 
 	"ushio":  "潮紗理菜",
 	"sarina": "潮紗理菜",
