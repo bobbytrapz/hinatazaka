@@ -145,3 +145,59 @@ func (t Tab) SaveBlog(ctx context.Context, link string, saveBlogAs string, saveI
 	t.PagePrintToPDF(saveBlogAs)
 	t.BlogImages(ctx, saveImagesTo)
 }
+
+// format string requires a list of classes
+var jsImages = `[...document.querySelectorAll('img%s')].map(el => el.src).toString()`
+
+// SaveImages sends javascript to get urls for images
+func (t Tab) SaveImages(ctx context.Context, saveTo string, classes string) {
+	t.Command("Runtime.evaluate", TabParams{
+		"expression": fmt.Sprintf(jsImages, classes),
+	})
+	// wait for reponse
+	data := <-t.recv
+	var res ResJSString
+	err := json.Unmarshal(data, &res)
+	if err != nil {
+		Log("chrome.Tab.SaveImages: %s", err)
+	}
+	Log("chrome.Tab.SaveImages: res: %+v", res)
+
+	for _, u := range strings.Split(res.Result.Value, ",") {
+		if u == "" {
+			continue
+		}
+		fn := filepath.Join(saveTo, filepath.Base(u))
+
+		res, err := fetch.Get(ctx, u)
+		if err != nil {
+			Log("chrome.Tab.SaveImages: %s", err)
+			fmt.Println("[nok]", err)
+			continue
+		}
+
+		f, err := os.OpenFile(fn, os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			Log("chrome.Tab.SaveImages: %s", err)
+			fmt.Println("[nok]", err)
+			continue
+		}
+
+		fmt.Println("[save]", fn)
+		_, err = io.Copy(f, res.Body)
+		if err != nil {
+			Log("chrome.Tab.SaveImages: %s", err)
+			fmt.Println("[nok]", err)
+		}
+
+		f.Close()
+		res.Body.Close()
+	}
+}
+
+// SaveImagesFrom a webpage with the given classes
+func (t Tab) SaveImagesFrom(ctx context.Context, link string, saveImagesTo string, classes string) {
+	t.PageNavigate(link)
+	t.WaitForLoad()
+	t.SaveImages(ctx, saveImagesTo, classes)
+}

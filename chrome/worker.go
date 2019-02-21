@@ -254,3 +254,14 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time) error 
 
 	return nil
 }
+
+// SaveImagesFrom a webpage
+func SaveImagesFrom(ctx context.Context, link string, saveImagesTo string, classes string) error {
+	tab, err := ConnectToNewTab(ctx)
+	if err != nil {
+		return fmt.Errorf("chrome.SaveAllBlogsSince: %s", err)
+	}
+	defer tab.PageClose()
+	tab.SaveImagesFrom(ctx, link, saveImagesTo, classes)
+	return nil
+}
