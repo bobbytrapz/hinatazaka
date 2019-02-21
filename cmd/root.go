@@ -6,6 +6,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var verbose bool
+
+func init() {
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
+}
+
 var rootCmd = &cobra.Command{
 	Use:   "hinatazaka",
 	Short: "hinatazaka is collection of tools related to 日向坂４６",

@@ -16,13 +16,11 @@ import (
 )
 
 var saveBlogsSince string
-var verbose bool
 var since time.Time
 
 func init() {
 	rootCmd.AddCommand(blogCmd)
 	blogCmd.Flags().StringVar(&saveBlogsSince, "since", "", "Save any blogs newer than this date ex: 2019-03-27")
-	blogCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
 }
 
 var blogCmd = &cobra.Command{
