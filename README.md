@@ -43,6 +43,7 @@ The blog is a pdf and all the images are saved in a directory according to the d
 Items supported so far:
 
 - blog: pdf printout of blog and each image
+- web: scrape images from a webpage only hustlepress supported so far
 
 ## Other Groups
 
