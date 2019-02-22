@@ -2,6 +2,8 @@ package chrome
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/base32"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -269,7 +271,11 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time) error 
 						return
 					}
 					// send each single blog we find for processing by a tab worker
-					jobs <- TabJob{b}
+					jobs <- TabJob{
+						Name: b.Name,
+						Link: b.Link,
+						At:   b.At,
+					}
 					count++
 				}
 				// read pages
@@ -283,8 +289,28 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time) error 
 	}()
 	visit <- root
 
+	completer := func(tab Tab, job TabJob) error {
+		h := sha1.New()
+		h.Write([]byte(job.Link))
+
+		hash := base32.StdEncoding.EncodeToString(h.Sum(nil))
+		saveImagesTo := filepath.Join(saveTo, job.Name, job.At.Format("2006-01-02"))
+		saveBlogAs := filepath.Join(saveImagesTo, fmt.Sprintf("%s.pdf", hash))
+
+		err := os.MkdirAll(saveImagesTo, os.ModePerm)
+		if err != nil {
+			fmt.Println("[nok]", err)
+			return fmt.Errorf("chrome.SaveAllBlogsSince: %s", err)
+		}
+
+		fmt.Println("[save]", job.Link)
+		tab.SaveBlog(ctx, job.Link, saveBlogAs, saveImagesTo)
+
+		return nil
+	}
+
 	// make some tab workers
-	tw := NewTabWorkers(ctx, NumTabWorkersPerMember)
+	tw := NewTabWorkers(ctx, NumTabWorkersPerMember, completer)
 
 	// distribute jobs
 	for tj := range jobs {

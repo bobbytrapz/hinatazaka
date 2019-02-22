@@ -2,12 +2,7 @@ package chrome
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/base32"
-	"fmt"
 	"math/rand"
-	"os"
-	"path/filepath"
 	"sync"
 	"time"
 )
@@ -25,7 +20,9 @@ var WorkerDelay = 30
 
 // TabJob is a job for a TabWorker
 type TabJob struct {
-	Blog Blog
+	Name string    `json:"name"`
+	At   time.Time `json:"at"`
+	Link string    `json:"link"`
 }
 
 // TabWorker completes TabJobs
@@ -58,7 +55,8 @@ func (tw *TabWorkers) Stop() {
 // NewTabWorkers builds a pool of TabWorkers
 // each worker opens a new tab so N new tabs are opened in chrome
 // after TabWorker.Stop those tabs should close
-func NewTabWorkers(ctx context.Context, N int) (tw *TabWorkers) {
+// each job we receieve is handled by the completer function
+func NewTabWorkers(ctx context.Context, N int, completer func(Tab, TabJob) error) (tw *TabWorkers) {
 	tw = &TabWorkers{
 		w:    make([]TabWorker, 0),
 		wid:  0,
@@ -93,23 +91,10 @@ func NewTabWorkers(ctx context.Context, N int) (tw *TabWorkers) {
 					tw.wg.Done()
 					return
 				case job := <-w.job:
-					b := job.Blog
-					h := sha1.New()
-					h.Write([]byte(b.Link))
-
-					hash := base32.StdEncoding.EncodeToString(h.Sum(nil))
-					saveImagesTo := filepath.Join(saveTo, b.Name, b.At.Format("2006-01-02"))
-					saveBlogAs := filepath.Join(saveImagesTo, fmt.Sprintf("%s.pdf", hash))
-
-					err := os.MkdirAll(saveImagesTo, os.ModePerm)
-					if err != nil {
+					if err := completer(w.tab, job); err != nil {
 						Log("chrome.NewTabWorkers: %s", err)
-						fmt.Println("[nok]", err)
 						return
 					}
-
-					fmt.Println("[save]", b.Link)
-					w.tab.SaveBlog(ctx, b.Link, saveBlogAs, saveImagesTo)
 					tw.wg.Done()
 				}
 
