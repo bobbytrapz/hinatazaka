@@ -43,7 +43,7 @@ func newRequest(ctx context.Context, host string, method string, url string) (re
 
 // Get a page
 func Get(ctx context.Context, link string) (*http.Response, error) {
-	u, err := url.Parse(link)
+	u, err := url.ParseRequestURI(link)
 	if err != nil {
 		panic("fetch.Get: invalid url" + link)
 	}

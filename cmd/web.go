@@ -52,7 +52,7 @@ var webCmd = &cobra.Command{
 
 		var wg sync.WaitGroup
 		for _, link := range args {
-			u, err := url.Parse(link)
+			u, err := url.ParseRequestURI(link)
 			if err != nil {
 				fmt.Println("Parse error:", err)
 				return
