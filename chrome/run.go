@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/bobbytrapz/hinatazaka/fetch"
-	"github.com/bobbytrapz/hinatazaka/options"
 	"github.com/bobbytrapz/homedir"
 )
 
@@ -30,16 +29,15 @@ func Wait() {
 }
 
 // Start finds chrome and runs it
-func Start(ctx context.Context) (err error) {
+func Start(ctx context.Context, userProfileDir string, port int) (err error) {
 	var app string
-	var userProfileDir string
 	switch runtime.GOOS {
 	case "darwin":
 		path := "/Applications/Google Chrome.app"
 		if s, err := os.Stat(path); err == nil && s.IsDir() {
 			app = fmt.Sprintf("open %s --args", path)
 		}
-		userProfileDir, err = homedir.Expand("~/.config/hinatazaka/hinatazaka-profile")
+		userProfileDir, err = homedir.Expand(userProfileDir)
 		if err != nil {
 			err = fmt.Errorf("chrome.Start: %s", err)
 		}
@@ -49,7 +47,7 @@ func Start(ctx context.Context) (err error) {
 			"chromium",
 			"google-chrome",
 		}
-		userProfileDir, err = homedir.Expand("~/.config/hinatazaka/hinatazaka-profile")
+		userProfileDir, err = homedir.Expand(userProfileDir)
 		if err != nil {
 			err = fmt.Errorf("chrome.Start: %s", err)
 		}
@@ -63,7 +61,6 @@ func Start(ctx context.Context) (err error) {
 		// todo: find chrome on windows
 	}
 
-	port := options.GetInt("chrome_port")
 	opts := []string{
 		"--headless",
 		"--disable-gpu", // for Windows

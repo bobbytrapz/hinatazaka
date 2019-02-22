@@ -3,10 +3,13 @@ package cmd
 import (
 	"os"
 
+	"github.com/bobbytrapz/hinatazaka/options"
 	"github.com/spf13/cobra"
 )
 
 var verbose bool
+var userProfileDir = "~/.config/hinatazaka/hinatazaka-profile"
+var port = options.GetInt("chrome_port")
 
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")

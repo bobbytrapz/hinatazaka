@@ -41,7 +41,7 @@ var webCmd = &cobra.Command{
 		}
 
 		// start chrome
-		if err := chrome.Start(ctx); err != nil {
+		if err := chrome.Start(ctx, userProfileDir, port); err != nil {
 			panic(err)
 		}
 
