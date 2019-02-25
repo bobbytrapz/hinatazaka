@@ -21,7 +21,7 @@ var saveTo = options.Get("save_to")
 // WaitForLoad waits a few seconds for page to load
 // todo: if we start missing blogs we need to find a better way
 func (t Tab) WaitForLoad() {
-	<-time.After(2 * time.Second)
+	<-time.After(5 * time.Second)
 }
 
 // uses Array toString() to make a comma-separated list of image urls
