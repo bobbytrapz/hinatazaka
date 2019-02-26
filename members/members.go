@@ -36,7 +36,7 @@ var nicknames = map[string]string{
 	"iguchi": "井口眞緒",
 	"mao":    "井口眞緒",
 	"mama":   "井口眞緒",
-	"ママ":  "井口眞緒",
+	"ママ":     "井口眞緒",
 
 	"ushio":  "潮紗理菜",
 	"sarina": "潮紗理菜",
@@ -114,6 +114,7 @@ var nicknames = map[string]string{
 
 	"watanabe": "渡邉美穂",
 	"miho":     "渡邉美穂",
+	"bemiho":   "渡邉美穂",
 
 	"kamimura":   "上村ひなの",
 	"hinano":     "上村ひなの",
