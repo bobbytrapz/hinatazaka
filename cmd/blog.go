@@ -54,8 +54,19 @@ var blogCmd = &cobra.Command{
 			return nil
 		case "week":
 			// within this week
-			day := time.Now().Weekday()
-			since = time.Now().AddDate(0, 0, -int(day))
+			weekday := time.Now().Weekday()
+			since = time.Now().AddDate(0, 0, -int(weekday))
+			return nil
+		case "month":
+			// within this month
+			day := time.Now().Day()
+			since = time.Now().AddDate(0, 0, -int(day)+1)
+			return nil
+		case "year":
+			// within this year
+			month := time.Now().Month()
+			day := time.Now().Day()
+			since = time.Now().AddDate(0, -int(month)+1, -int(day)+1)
 			return nil
 		default:
 			since, err = time.Parse("2006-01-02", saveBlogsSince)
