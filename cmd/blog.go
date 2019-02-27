@@ -37,18 +37,30 @@ var blogCmd = &cobra.Command{
 			return nil
 		}
 
-		if saveBlogsSince == "forever" {
+		switch saveBlogsSince {
+		case "forever":
 			// save all blogs since forever
 			since = time.Time{}
 			return nil
+		case "today":
+			// same as default
+			since = time.Now()
+			return nil
+		case "yesterday":
+			since = time.Now().AddDate(0, 0, -1)
+			return nil
+		case "week":
+			// within this week
+			day := time.Now().Weekday()
+			since = time.Now().AddDate(0, 0, -int(day))
+			return nil
+		default:
+			since, err = time.Parse("2006-01-02", saveBlogsSince)
+			if err != nil {
+				return err
+			}
+			return nil
 		}
-
-		since, err = time.Parse("2006-01-02", saveBlogsSince)
-		if err != nil {
-			return err
-		}
-
-		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
