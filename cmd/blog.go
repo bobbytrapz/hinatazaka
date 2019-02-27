@@ -16,11 +16,13 @@ import (
 )
 
 var saveBlogsSince string
+var maxSaved int
 var since time.Time
 
 func init() {
 	rootCmd.AddCommand(blogCmd)
 	blogCmd.Flags().StringVar(&saveBlogsSince, "since", "", "Save any blogs newer than this date ex: 2019-03-27")
+	blogCmd.Flags().IntVar(&maxSaved, "count", -1, "The max number of blogs to save. Default is unlimited.")
 }
 
 var blogCmd = &cobra.Command{
@@ -107,7 +109,7 @@ var blogCmd = &cobra.Command{
 					return
 				}
 				fmt.Printf("Saving %s blogs since %s\n", m, since.Format("2006-01-02"))
-				chrome.SaveAllBlogsSince(ctx, link, since)
+				chrome.SaveAllBlogsSince(ctx, link, since, maxSaved)
 			}(member)
 		}
 

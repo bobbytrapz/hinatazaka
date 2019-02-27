@@ -206,11 +206,11 @@ func (t Tab) SaveImagesFrom(ctx context.Context, link string, saveImagesTo strin
 
 // SaveAllBlogs gets the list of blogs and save them all
 func SaveAllBlogs(ctx context.Context, root string) error {
-	return SaveAllBlogsSince(ctx, root, time.Time{})
+	return SaveAllBlogsSince(ctx, root, time.Time{}, -1)
 }
 
 // SaveAllBlogsSince gets the list of blogs and saves any that came after since
-func SaveAllBlogsSince(ctx context.Context, root string, since time.Time) error {
+func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSaved int) error {
 	jobs := make(chan TabJob)
 	visit := make(chan string)
 	done := make(chan struct{})
@@ -263,6 +263,11 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time) error 
 				tab.WaitForLoad()
 				res := tab.Blogs()
 				for _, b := range res.Blogs {
+					if count >= maxSaved {
+						Log("chrome.SaveAllBlogsSince: reached max blog save count")
+						close(done)
+						return
+					}
 					// the blogs are found in reverse chronological order so
 					// I think this should work
 					if b.At.Before(since) {
