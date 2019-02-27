@@ -30,6 +30,12 @@ Download Kyoko and Kageyama's blogs since Independence Day:
 hinatazaka blog kyoko kagechan --since 2019-02-11
 ```
 
+Download two of kyoko's blogs from this week:
+
+```
+hinatazaka blog kyoko --since week --count 2
+```
+
 Archive Iguchi's blog:
 
 ```
