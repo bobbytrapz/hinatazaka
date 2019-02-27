@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -206,7 +207,7 @@ func (t Tab) SaveImagesFrom(ctx context.Context, link string, saveImagesTo strin
 
 // SaveAllBlogs gets the list of blogs and save them all
 func SaveAllBlogs(ctx context.Context, root string) error {
-	return SaveAllBlogsSince(ctx, root, time.Time{}, -1)
+	return SaveAllBlogsSince(ctx, root, time.Time{}, math.MaxInt32)
 }
 
 // SaveAllBlogsSince gets the list of blogs and saves any that came after since

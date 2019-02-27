@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/signal"
 	"sync"
@@ -22,7 +23,7 @@ var since time.Time
 func init() {
 	rootCmd.AddCommand(blogCmd)
 	blogCmd.Flags().StringVar(&saveBlogsSince, "since", "", "Save any blogs newer than this date ex: 2019-03-27")
-	blogCmd.Flags().IntVar(&maxSaved, "count", -1, "The max number of blogs to save. Default is unlimited.")
+	blogCmd.Flags().IntVar(&maxSaved, "count", math.MaxInt32, "The max number of blogs to save.")
 }
 
 var blogCmd = &cobra.Command{
