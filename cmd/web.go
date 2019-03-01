@@ -62,8 +62,17 @@ var webCmd = &cobra.Command{
 				wg.Add(1)
 				go func(l string) {
 					defer wg.Done()
+					jsCode := `[...document.querySelectorAll('img.size-full')].map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					chrome.SaveImagesFrom(ctx, link, saveWebImagesTo, ".size-full")
+					chrome.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
+				}(link)
+			case "ray-web.jp":
+				wg.Add(1)
+				go func(l string) {
+					defer wg.Done()
+					jsCode := `[...document.querySelectorAll('.scale_full > a > img,.top_photo > img')].map(el => el.src).toString()`
+					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
+					chrome.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
 				}(link)
 			default:
 				fmt.Println("We cannot handle:", link)
