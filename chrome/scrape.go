@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -149,13 +150,11 @@ func (t Tab) SaveBlog(ctx context.Context, link string, saveBlogAs string, saveI
 	t.BlogImages(ctx, saveImagesTo)
 }
 
-// format string requires a list of classes
-var jsImages = `[...document.querySelectorAll('img%s')].map(el => el.src).toString()`
-
-// SaveImages sends javascript to get urls for images
-func (t Tab) SaveImages(ctx context.Context, saveTo string, classes string) {
+// SaveImagesWith sends given javascript to get urls for images
+// then it downloads each image from a list of comma-separated urls
+func (t Tab) SaveImagesWith(ctx context.Context, saveTo string, jsCode string) {
 	t.Command("Runtime.evaluate", TabParams{
-		"expression": fmt.Sprintf(jsImages, classes),
+		"expression": jsCode,
 	})
 	// wait for reponse
 	data := <-t.recv
@@ -170,7 +169,14 @@ func (t Tab) SaveImages(ctx context.Context, saveTo string, classes string) {
 		if u == "" {
 			continue
 		}
-		fn := filepath.Join(saveTo, filepath.Base(u))
+
+		purl, err := url.Parse(u)
+		if err != nil {
+			Log("chrome.Tab.SaveImages: %s", err)
+			fmt.Println("[nok]", err)
+			continue
+		}
+		fn := filepath.Join(saveTo, filepath.Base(purl.Path))
 
 		res, err := fetch.Get(ctx, u)
 		if err != nil {
@@ -198,11 +204,11 @@ func (t Tab) SaveImages(ctx context.Context, saveTo string, classes string) {
 	}
 }
 
-// SaveImagesFrom a webpage with the given classes
-func (t Tab) SaveImagesFrom(ctx context.Context, link string, saveImagesTo string, classes string) {
+// SaveImages a webpage with the given classes
+func (t Tab) SaveImages(ctx context.Context, link string, saveImagesTo string, jsCode string) {
 	t.PageNavigate(link)
 	t.WaitForLoad()
-	t.SaveImages(ctx, saveImagesTo, classes)
+	t.SaveImagesWith(ctx, saveImagesTo, jsCode)
 }
 
 // SaveAllBlogs gets the list of blogs and save them all
@@ -332,12 +338,12 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 }
 
 // SaveImagesFrom a webpage
-func SaveImagesFrom(ctx context.Context, link string, saveImagesTo string, classes string) error {
+func SaveImagesFrom(ctx context.Context, link string, saveImagesTo string, jsCode string) error {
 	tab, err := ConnectToNewTab(ctx)
 	if err != nil {
 		return fmt.Errorf("chrome.SaveAllBlogsSince: %s", err)
 	}
 	defer tab.PageClose()
-	tab.SaveImagesFrom(ctx, link, saveImagesTo, classes)
+	tab.SaveImages(ctx, link, saveImagesTo, jsCode)
 	return nil
 }
