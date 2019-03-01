@@ -55,8 +55,8 @@ func (tw *TabWorkers) Stop() {
 // NewTabWorkers builds a pool of TabWorkers
 // each worker opens a new tab so N new tabs are opened in chrome
 // after TabWorker.Stop those tabs should close
-// each job we receieve is handled by the completer function
-func NewTabWorkers(ctx context.Context, N int, completer func(Tab, TabJob) error) (tw *TabWorkers) {
+// each job we receieve is handled by the job function
+func NewTabWorkers(ctx context.Context, N int, jobFn func(Tab, TabJob) error) (tw *TabWorkers) {
 	tw = &TabWorkers{
 		w:    make([]TabWorker, 0),
 		wid:  0,
@@ -91,7 +91,7 @@ func NewTabWorkers(ctx context.Context, N int, completer func(Tab, TabJob) error
 					tw.wg.Done()
 					return
 				case job := <-w.job:
-					if err := completer(w.tab, job); err != nil {
+					if err := jobFn(w.tab, job); err != nil {
 						Log("chrome.NewTabWorkers: %s", err)
 						return
 					}

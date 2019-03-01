@@ -301,7 +301,7 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 	}()
 	visit <- root
 
-	completer := func(tab Tab, job TabJob) error {
+	jobFn := func(tab Tab, job TabJob) error {
 		h := sha1.New()
 		h.Write([]byte(job.Link))
 
@@ -322,7 +322,7 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 	}
 
 	// make some tab workers
-	tw := NewTabWorkers(ctx, NumTabWorkersPerMember, completer)
+	tw := NewTabWorkers(ctx, NumTabWorkersPerMember, jobFn)
 
 	// distribute jobs
 	for tj := range jobs {
