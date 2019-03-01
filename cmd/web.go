@@ -74,6 +74,18 @@ var webCmd = &cobra.Command{
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
 					chrome.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
 				}(link)
+			case "bisweb.jp":
+				wg.Add(1)
+				go func(l string) {
+					defer wg.Done()
+					jsCode := `[
+							...document.querySelector(".tieup_wrap").querySelectorAll("p > img")
+						].map(el => el.src)
+						.concat([document.querySelector(".single_kv").style.backgroundImage.slice(5, -2)])
+						.toString()`
+					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
+					chrome.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
+				}(link)
 			default:
 				fmt.Println("We cannot handle:", link)
 			}
