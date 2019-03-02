@@ -7,7 +7,6 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/bobbytrapz/homedir"
 	"github.com/spf13/viper"
 )
 
@@ -34,9 +33,9 @@ const (
 	Filename = "options"
 	// Format for config file
 	Format            = "toml"
-	defaultSavePath   = "~/hinatazaka"
-	configPathWindows = `~\AppData\Roaming\hinatazaka\`
-	configPathUnix    = "~/.config/hinatazaka/"
+	defaultSavePath   = "hinatazaka"
+	configPathWindows = `AppData\Roaming\hinatazaka\`
+	configPathUnix    = ".config/hinatazaka/"
 	defaultUserAgent  = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36`
 	defaultChromePort = 32719
 )
@@ -47,6 +46,12 @@ var ConfigPath string
 var v = viper.New()
 
 func init() {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Println("options.init:", err)
+		os.Exit(1)
+	}
+
 	// set defaults
 	v.SetDefault("user_agent", defaultUserAgent)
 	v.SetDefault("chrome_port", defaultChromePort)
@@ -54,23 +59,18 @@ func init() {
 	v.SetConfigType(Format)
 	v.SetConfigName(Filename)
 
-	var err error
 	var configPath string
 	if runtime.GOOS == "windows" {
-		configPath, err = homedir.Expand(configPathWindows)
+		configPath = filepath.Join(home, configPathWindows)
 	} else {
-		configPath, err = homedir.Expand(configPathUnix)
+		configPath = filepath.Join(home, configPathUnix)
 	}
 	if err != nil {
 		fmt.Println("options.init:", err)
 		os.Exit(1)
 	}
 
-	savePath, err := homedir.Expand(defaultSavePath)
-	if err != nil {
-		fmt.Println("options.init:", err)
-		os.Exit(1)
-	}
+	savePath := filepath.Join(home, defaultSavePath)
 
 	ConfigPath = configPath
 

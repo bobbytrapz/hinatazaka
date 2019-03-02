@@ -7,12 +7,12 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"sync"
 	"time"
 
 	"github.com/bobbytrapz/hinatazaka/fetch"
-	"github.com/bobbytrapz/homedir"
 )
 
 var rw sync.RWMutex
@@ -31,25 +31,26 @@ func Wait() {
 // Start finds chrome and runs it
 func Start(ctx context.Context, userProfileDir string, port int) (err error) {
 	var app string
+	if userProfileDir[:2] == "~/" {
+		var home string
+		home, err = os.UserHomeDir()
+		if err != nil {
+			err = fmt.Errorf("chrome.Start: %s", err)
+			return
+		}
+		userProfileDir = filepath.Join(home, userProfileDir[2:])
+	}
 	switch runtime.GOOS {
 	case "darwin":
 		path := "/Applications/Google Chrome.app"
 		if s, err := os.Stat(path); err == nil && s.IsDir() {
 			app = fmt.Sprintf("open %s --args", path)
 		}
-		userProfileDir, err = homedir.Expand(userProfileDir)
-		if err != nil {
-			err = fmt.Errorf("chrome.Start: %s", err)
-		}
 	case "linux":
 		names := []string{
 			"chromium-browser",
 			"chromium",
 			"google-chrome",
-		}
-		userProfileDir, err = homedir.Expand(userProfileDir)
-		if err != nil {
-			err = fmt.Errorf("chrome.Start: %s", err)
 		}
 		for _, name := range names {
 			if _, err := exec.LookPath(name); err == nil {
