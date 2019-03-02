@@ -17,6 +17,7 @@ import (
 )
 
 var saveBlogsSince string
+var saveTo string
 var maxSaved int
 var since time.Time
 
@@ -24,6 +25,7 @@ func init() {
 	rootCmd.AddCommand(blogCmd)
 	blogCmd.Flags().StringVar(&saveBlogsSince, "since", "", "Save any blogs newer than this date ex: 2019-03-27")
 	blogCmd.Flags().IntVar(&maxSaved, "count", math.MaxInt32, "The max number of blogs to save.")
+	blogCmd.Flags().StringVar(&saveTo, "saveto", "", "Directory path to save blog data to")
 }
 
 var blogCmd = &cobra.Command{
@@ -32,6 +34,12 @@ var blogCmd = &cobra.Command{
 	Args: func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) < 1 {
 			return errors.New("We need at least one name/nickname of a hinatazaka member")
+		}
+
+		if saveTo != "" {
+			if stat, err := os.Stat(saveTo); os.IsNotExist(err) || !stat.IsDir() {
+				return errors.New("Save path must be a directory")
+			}
 		}
 
 		if saveBlogsSince == "" {
@@ -108,6 +116,10 @@ var blogCmd = &cobra.Command{
 			}
 			addArg := members.RealName(a)
 			uniqueArgs[addArg] = true
+		}
+
+		if saveTo != "" {
+			chrome.SaveTo = saveTo
 		}
 
 		var wg sync.WaitGroup
