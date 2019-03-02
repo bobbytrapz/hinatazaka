@@ -18,7 +18,8 @@ import (
 	"github.com/bobbytrapz/hinatazaka/options"
 )
 
-var saveTo = options.Get("save_to")
+// SaveTo decides where we save everything that we find
+var SaveTo = options.Get("save_to")
 
 // WaitForLoad waits a few seconds for page to load
 // todo: if we start missing blogs we need to find a better way
@@ -306,7 +307,7 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 		h.Write([]byte(job.Link))
 
 		hash := base32.StdEncoding.EncodeToString(h.Sum(nil))
-		saveImagesTo := filepath.Join(saveTo, job.Name, job.At.Format("2006-01-02"))
+		saveImagesTo := filepath.Join(SaveTo, job.Name, job.At.Format("2006-01-02"))
 		saveBlogAs := filepath.Join(saveImagesTo, fmt.Sprintf("%s.pdf", hash))
 
 		err := os.MkdirAll(saveImagesTo, os.ModePerm)
