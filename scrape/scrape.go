@@ -279,7 +279,7 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 					// the blogs are found in reverse chronological order so
 					// I think this should work
 					at := time.Date(b.Year, b.Month, b.Day, 0, 0, 0, 0, loc)
-					if at == since || at.Before(since) {
+					if at.Before(since) {
 						chrome.Log("scrape.SaveAllBlogsSince: found oldest blog")
 						close(done)
 						return
