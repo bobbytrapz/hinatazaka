@@ -62,6 +62,11 @@ func (t Tab) Command(method string, params TabParams) {
 	t.send <- buf.Bytes()
 }
 
+// Wait for a response
+func (t Tab) Wait() []byte {
+	return <-t.recv
+}
+
 // ResPageSetLifecycleEventsEnabled is a response
 type ResPageSetLifecycleEventsEnabled struct {
 	FrameID  string `json:"frameId"`
