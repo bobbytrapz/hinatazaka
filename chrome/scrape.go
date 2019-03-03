@@ -224,9 +224,6 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 	done := make(chan struct{})
 	visited := make(map[string]bool)
 
-	// include the given date
-	since = since.AddDate(0, 0, -1)
-
 	// spider
 	tab, err := ConnectToNewTab(ctx)
 	if err != nil {

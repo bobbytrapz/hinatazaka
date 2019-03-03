@@ -42,9 +42,15 @@ var blogCmd = &cobra.Command{
 			}
 		}
 
+		// use tokyo time
+		loc, err := time.LoadLocation("Asia/Tokyo")
+		if err != nil {
+			panic(err)
+		}
+
 		if saveBlogsSince == "" {
 			// default to today's blogs
-			since = time.Now()
+			since = time.Now().In(loc)
 			return nil
 		}
 
@@ -55,26 +61,26 @@ var blogCmd = &cobra.Command{
 			return nil
 		case "today":
 			// same as default
-			since = time.Now()
+			since = time.Now().In(loc)
 			return nil
 		case "yesterday":
-			since = time.Now().AddDate(0, 0, -1)
+			since = time.Now().In(loc).AddDate(0, 0, -1)
 			return nil
 		case "week":
 			// within this week
-			weekday := time.Now().Weekday()
+			weekday := time.Now().In(loc).Weekday()
 			since = time.Now().AddDate(0, 0, -int(weekday))
 			return nil
 		case "month":
 			// within this month
-			day := time.Now().Day()
-			since = time.Now().AddDate(0, 0, -int(day)+1)
+			day := time.Now().In(loc).Day()
+			since = time.Now().In(loc).AddDate(0, 0, -int(day)+1)
 			return nil
 		case "year":
 			// within this year
-			month := time.Now().Month()
-			day := time.Now().Day()
-			since = time.Now().AddDate(0, -int(month)+1, -int(day)+1)
+			month := time.Now().In(loc).Month()
+			day := time.Now().In(loc).Day()
+			since = time.Now().In(loc).AddDate(0, -int(month)+1, -int(day)+1)
 			return nil
 		default:
 			since, err = time.Parse("2006-01-02", saveBlogsSince)
