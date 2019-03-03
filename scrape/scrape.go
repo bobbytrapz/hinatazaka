@@ -306,9 +306,6 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 	visit <- root
 
 	jobFn := func(tab chrome.Tab, job chrome.TabJob) error {
-		h := sha1.New()
-		h.Write([]byte(job.Link))
-
 		name, ok := job.GetString("Name")
 		if !ok {
 			return fmt.Errorf("scrape.SaveAllBlogsSince: could not file 'Name'")
@@ -319,6 +316,8 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 		}
 		at := t.Format("2006-01-02")
 
+		h := sha1.New()
+		h.Write([]byte(job.Link))
 		hash := base32.StdEncoding.EncodeToString(h.Sum(nil))
 		saveImagesTo := filepath.Join(SaveTo, name, at)
 		saveBlogAs := filepath.Join(saveImagesTo, fmt.Sprintf("%s.pdf", hash))
