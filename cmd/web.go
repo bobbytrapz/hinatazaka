@@ -11,6 +11,8 @@ import (
 	"sync"
 
 	"github.com/bobbytrapz/hinatazaka/chrome"
+	"github.com/bobbytrapz/hinatazaka/options"
+	"github.com/bobbytrapz/hinatazaka/scrape"
 	"github.com/spf13/cobra"
 )
 
@@ -40,6 +42,8 @@ var webCmd = &cobra.Command{
 			chrome.Log = log.Printf
 		}
 
+		chrome.UserAgent = options.Get("user_agent")
+
 		// start chrome
 		if err := chrome.Start(ctx, userProfileDir, port); err != nil {
 			panic(err)
@@ -64,7 +68,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelectorAll('img.size-full')].map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					chrome.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
 				}(link)
 			case "ray-web.jp":
 				wg.Add(1)
@@ -72,7 +76,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelectorAll('.scale_full > a > img,.top_photo > img')].map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					chrome.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
 				}(link)
 			case "bisweb.jp":
 				wg.Add(1)
@@ -84,7 +88,7 @@ var webCmd = &cobra.Command{
 						.concat([document.querySelector(".single_kv").style.backgroundImage.slice(5, -2)])
 						.toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					chrome.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
 				}(link)
 			default:
 				fmt.Println("We cannot handle:", link)

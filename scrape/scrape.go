@@ -1,4 +1,4 @@
-package chrome
+package scrape
 
 import (
 	"context"
@@ -14,18 +14,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bobbytrapz/hinatazaka/fetch"
+	"github.com/bobbytrapz/hinatazaka/chrome"
 	"github.com/bobbytrapz/hinatazaka/options"
 )
 
+// NumTabWorkersPerMember decides how many tabs to open for each blog spider
+var NumTabWorkersPerMember = 8
+
 // SaveTo decides where we save everything that we find
 var SaveTo = options.Get("save_to")
-
-// WaitForLoad waits a few seconds for page to load
-// todo: if we start missing blogs we need to find a better way
-func (t Tab) WaitForLoad() {
-	<-time.After(5 * time.Second)
-}
 
 // uses Array toString() to make a comma-separated list of image urls
 var jsBlogImages = `[...document.querySelectorAll(':scope article img:not(.emoji)')].map(el => el.src).toString()`
@@ -38,19 +35,19 @@ type ResJSString struct {
 	} `json:"result"`
 }
 
-// BlogImages sends javascript to get urls for blog images
-func (t Tab) BlogImages(ctx context.Context, saveTo string) {
-	t.Command("Runtime.evaluate", TabParams{
+// SaveBlogImagesFromTab sends javascript to get urls for blog images
+func SaveBlogImagesFromTab(ctx context.Context, tab chrome.Tab, saveTo string) {
+	tab.Command("Runtime.evaluate", chrome.TabParams{
 		"expression": jsBlogImages,
 	})
 	// wait for reponse
-	data := <-t.recv
+	data := tab.Wait()
 	var res ResJSString
 	err := json.Unmarshal(data, &res)
 	if err != nil {
-		Log("chrome.Tab.BlogImages: %s", err)
+		chrome.Log("scrape.SaveBlogImagesFromTab: %s", err)
 	}
-	Log("chrome.Tab.BlogImages: res: %+v", res)
+	chrome.Log("scrape.SaveBlogImagesFromTab: res: %+v", res)
 
 	for _, u := range strings.Split(res.Result.Value, ",") {
 		if u == "" {
@@ -58,16 +55,16 @@ func (t Tab) BlogImages(ctx context.Context, saveTo string) {
 		}
 		fn := filepath.Join(saveTo, filepath.Base(u))
 
-		res, err := fetch.Get(ctx, u)
+		res, err := chrome.Fetch(ctx, u)
 		if err != nil {
-			Log("chrome.Tab.BlogImages: %s", err)
+			chrome.Log("scrape.SaveBlogImagesFromTab: %s", err)
 			fmt.Println("[nok]", err)
 			continue
 		}
 
 		f, err := os.OpenFile(fn, os.O_WRONLY|os.O_CREATE, 0644)
 		if err != nil {
-			Log("chrome.Tab.BlogImages: %s", err)
+			chrome.Log("scrape.SaveBlogImagesFromTab: %s", err)
 			fmt.Println("[nok]", err)
 			continue
 		}
@@ -75,7 +72,7 @@ func (t Tab) BlogImages(ctx context.Context, saveTo string) {
 		fmt.Println("[save]", fn)
 		_, err = io.Copy(f, res.Body)
 		if err != nil {
-			Log("chrome.Tab.BlogImages: %s", err)
+			chrome.Log("scrape.SaveBlogImagesFromTab: %s", err)
 			fmt.Println("[nok]", err)
 		}
 
@@ -92,9 +89,11 @@ type ResJSBlog struct {
 
 // Blog is an individual blog
 type Blog struct {
-	Name string    `json:"name"`
-	At   time.Time `json:"at"`
-	Link string    `json:"link"`
+	Name  string     `json:"name"`
+	Year  int        `json:"year"`
+	Month time.Month `json:"month"`
+	Day   int        `json:"day"`
+	Link  string     `json:"link"`
 }
 
 // each member has a page that lists all of their blogs
@@ -106,65 +105,70 @@ var jsBlogs = `
 JSON.stringify({
 	pages: [...document.querySelectorAll('.pager a')].map(el => el.href),
 	blogs: [...document.querySelectorAll('article > .innerHead')].map(el => {
-  	name = el.querySelector('.box-ttl .name').textContent.trim();
-  	link = el.querySelector('.box-ttl a').href;
+    name = el.querySelector('.box-ttl .name').textContent.trim();
+    link = el.querySelector('.box-ttl a').href;
     t = el.querySelectorAll('.box-date > time');
-  	yearmonth = t[0].textContent.replace('.', '-');
+    [year, month] = t[0].textContent.split('.')
     day = t[1].textContent;
     return {
       name: name,
-      at: new Date(yearmonth + '-' + day),
+      year: parseInt(year),
+      month: parseInt(month),
+      day: parseInt(day),
       link: link,
     }
 })})
 `
 
-// Blogs sends javascript to get links and dates of all blogs on a page
-func (t Tab) Blogs() (blogs ResJSBlog) {
-	t.Command("Runtime.evaluate", TabParams{
+// BlogsFromTab sends javascript to get links and dates of all blogs on a page
+func BlogsFromTab(tab chrome.Tab) (blogs ResJSBlog) {
+	tab.Command("Runtime.evaluate", chrome.TabParams{
 		"expression": jsBlogs,
 	})
 	// wait for reponse
-	data := <-t.recv
+	data := tab.Wait()
 	var res ResJSString
 	err := json.Unmarshal(data, &res)
 	if err != nil {
-		Log("chrome.Tab.Blogs: %s", err)
+		chrome.Log("scrape.BlogsFromTab: %s", err)
 		return
 	}
 
 	err = json.Unmarshal([]byte(res.Result.Value), &blogs)
 	if err != nil {
-		Log("chrome.Tab.Blogs: %s", err)
+		chrome.Log("scrape.BlogsFromTab: %s", err)
 		return
 	}
-	Log("chrome.Tab.Blogs: res: %+v", blogs)
+	chrome.Log("scrape.BlogsFromTab: res: %+v", blogs)
 
 	return
 }
 
-// SaveBlog saves a single individual blog
-func (t Tab) SaveBlog(ctx context.Context, link string, saveBlogAs string, saveImagesTo string) {
-	t.PageNavigate(link)
-	t.WaitForLoad()
-	t.PagePrintToPDF(saveBlogAs)
-	t.BlogImages(ctx, saveImagesTo)
+// SaveBlogFromTab saves a single individual blog
+func SaveBlogFromTab(ctx context.Context, tab chrome.Tab, link string, saveBlogAs string, saveImagesTo string) {
+	tab.PageNavigate(link)
+	tab.WaitForLoad()
+	tab.PagePrintToPDF(saveBlogAs)
+	SaveBlogImagesFromTab(ctx, tab, saveImagesTo)
 }
 
-// SaveImagesWith sends given javascript to get urls for images
+// SaveImagesFromTabWith sends given javascript to get urls for images
 // then it downloads each image from a list of comma-separated urls
-func (t Tab) SaveImagesWith(ctx context.Context, saveTo string, jsCode string) {
-	t.Command("Runtime.evaluate", TabParams{
+func SaveImagesFromTabWith(ctx context.Context, tab chrome.Tab, link string, saveTo string, jsCode string) {
+	tab.PageNavigate(link)
+	tab.WaitForLoad()
+
+	tab.Command("Runtime.evaluate", chrome.TabParams{
 		"expression": jsCode,
 	})
 	// wait for reponse
-	data := <-t.recv
+	data := tab.Wait()
 	var res ResJSString
 	err := json.Unmarshal(data, &res)
 	if err != nil {
-		Log("chrome.Tab.SaveImages: %s", err)
+		chrome.Log("scrape.SaveImagesFromTabWith: %s", err)
 	}
-	Log("chrome.Tab.SaveImages: res: %+v", res)
+	chrome.Log("scrape.SaveImagesFromTabWith: res: %+v", res)
 
 	for _, u := range strings.Split(res.Result.Value, ",") {
 		if u == "" {
@@ -173,22 +177,22 @@ func (t Tab) SaveImagesWith(ctx context.Context, saveTo string, jsCode string) {
 
 		purl, err := url.Parse(u)
 		if err != nil {
-			Log("chrome.Tab.SaveImages: %s", err)
+			chrome.Log("scrape.SaveImagesFromTabWith: %s", err)
 			fmt.Println("[nok]", err)
 			continue
 		}
 		fn := filepath.Join(saveTo, filepath.Base(purl.Path))
 
-		res, err := fetch.Get(ctx, u)
+		res, err := chrome.Fetch(ctx, u)
 		if err != nil {
-			Log("chrome.Tab.SaveImages: %s", err)
+			chrome.Log("scrape.SaveImagesFromTabWith: %s", err)
 			fmt.Println("[nok]", err)
 			continue
 		}
 
 		f, err := os.OpenFile(fn, os.O_WRONLY|os.O_CREATE, 0644)
 		if err != nil {
-			Log("chrome.Tab.SaveImages: %s", err)
+			chrome.Log("scrape.SaveImagesFromTabWith: %s", err)
 			fmt.Println("[nok]", err)
 			continue
 		}
@@ -196,20 +200,13 @@ func (t Tab) SaveImagesWith(ctx context.Context, saveTo string, jsCode string) {
 		fmt.Println("[save]", fn)
 		_, err = io.Copy(f, res.Body)
 		if err != nil {
-			Log("chrome.Tab.SaveImages: %s", err)
+			chrome.Log("scrape.SaveImagesFromTabWith: %s", err)
 			fmt.Println("[nok]", err)
 		}
 
 		f.Close()
 		res.Body.Close()
 	}
-}
-
-// SaveImages a webpage with the given classes
-func (t Tab) SaveImages(ctx context.Context, link string, saveImagesTo string, jsCode string) {
-	t.PageNavigate(link)
-	t.WaitForLoad()
-	t.SaveImagesWith(ctx, saveImagesTo, jsCode)
 }
 
 // SaveAllBlogs gets the list of blogs and save them all
@@ -219,18 +216,24 @@ func SaveAllBlogs(ctx context.Context, root string) error {
 
 // SaveAllBlogsSince gets the list of blogs and saves any that came after since
 func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSaved int) error {
-	jobs := make(chan TabJob)
+	jobs := make(chan chrome.TabJob)
 	visit := make(chan string)
 	done := make(chan struct{})
 	visited := make(map[string]bool)
 
-	// spider
-	tab, err := ConnectToNewTab(ctx)
+	// use tokyo time
+	loc, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
-		return fmt.Errorf("chrome.SaveAllBlogsSince: %s", err)
+		panic(err)
+	}
+
+	// spider
+	tab, err := chrome.ConnectToNewTab(ctx)
+	if err != nil {
+		return fmt.Errorf("scrape.SaveAllBlogsSince: %s", err)
 	}
 	count := 0
-	spiderTimeout := time.Duration(WorkerDelay) * time.Second
+	spiderTimeout := time.Duration(30) * time.Second
 	timeout := time.NewTimer(spiderTimeout)
 	go func() {
 		defer tab.PageClose()
@@ -245,7 +248,7 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 				// dumb way to stop searching for blogs
 				// use a timeout to decide when done
 				// or to just stop if we have network issues
-				Log("chrome.SaveAllBlogsSince: timeout since we found nothing")
+				chrome.Log("scrape.SaveAllBlogsSince: timeout since we found nothing")
 				return
 			case link := <-visit:
 				// check visited
@@ -266,25 +269,28 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 				// get list of blogs
 				tab.PageNavigate(link)
 				tab.WaitForLoad()
-				res := tab.Blogs()
+				res := BlogsFromTab(tab)
 				for _, b := range res.Blogs {
 					if count >= maxSaved {
-						Log("chrome.SaveAllBlogsSince: reached max blog save count")
+						chrome.Log("scrape.SaveAllBlogsSince: reached max blog save count")
 						close(done)
 						return
 					}
 					// the blogs are found in reverse chronological order so
 					// I think this should work
-					if b.At.Before(since) {
-						Log("chrome.SaveAllBlogsSince: found oldest blog")
+					at := time.Date(b.Year, b.Month, b.Day, 0, 0, 0, 0, loc)
+					if at == since || at.Before(since) {
+						chrome.Log("scrape.SaveAllBlogsSince: found oldest blog")
 						close(done)
 						return
 					}
 					// send each single blog we find for processing by a tab worker
-					jobs <- TabJob{
-						Name: b.Name,
+					jobs <- chrome.TabJob{
 						Link: b.Link,
-						At:   b.At,
+						Data: map[string]interface{}{
+							"Name": b.Name,
+							"At":   at,
+						},
 					}
 					count++
 				}
@@ -299,28 +305,38 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 	}()
 	visit <- root
 
-	jobFn := func(tab Tab, job TabJob) error {
+	jobFn := func(tab chrome.Tab, job chrome.TabJob) error {
 		h := sha1.New()
 		h.Write([]byte(job.Link))
 
+		name, ok := job.GetString("Name")
+		if !ok {
+			return fmt.Errorf("scrape.SaveAllBlogsSince: could not file 'Name'")
+		}
+		t, ok := job.GetTime("At")
+		if !ok {
+			return fmt.Errorf("scrape.SaveAllBlogsSince: could not find 'At'")
+		}
+		at := t.Format("2006-01-02")
+
 		hash := base32.StdEncoding.EncodeToString(h.Sum(nil))
-		saveImagesTo := filepath.Join(SaveTo, job.Name, job.At.Format("2006-01-02"))
+		saveImagesTo := filepath.Join(SaveTo, name, at)
 		saveBlogAs := filepath.Join(saveImagesTo, fmt.Sprintf("%s.pdf", hash))
 
 		err := os.MkdirAll(saveImagesTo, os.ModePerm)
 		if err != nil {
 			fmt.Println("[nok]", err)
-			return fmt.Errorf("chrome.SaveAllBlogsSince: %s", err)
+			return fmt.Errorf("scrape.SaveAllBlogsSince: %s", err)
 		}
 
 		fmt.Println("[save]", job.Link)
-		tab.SaveBlog(ctx, job.Link, saveBlogAs, saveImagesTo)
+		SaveBlogFromTab(ctx, tab, job.Link, saveBlogAs, saveImagesTo)
 
 		return nil
 	}
 
 	// make some tab workers
-	tw := NewTabWorkers(ctx, NumTabWorkersPerMember, jobFn)
+	tw := chrome.NewTabWorkers(ctx, NumTabWorkersPerMember, jobFn)
 
 	// distribute jobs
 	for tj := range jobs {
@@ -337,11 +353,11 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 
 // SaveImagesFrom a webpage
 func SaveImagesFrom(ctx context.Context, link string, saveImagesTo string, jsCode string) error {
-	tab, err := ConnectToNewTab(ctx)
+	tab, err := chrome.ConnectToNewTab(ctx)
 	if err != nil {
-		return fmt.Errorf("chrome.SaveAllBlogsSince: %s", err)
+		return fmt.Errorf("scrape.SaveImagesFrom: %s", err)
 	}
 	defer tab.PageClose()
-	tab.SaveImages(ctx, link, saveImagesTo, jsCode)
+	SaveImagesFromTabWith(ctx, tab, link, saveImagesTo, jsCode)
 	return nil
 }

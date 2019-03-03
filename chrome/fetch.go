@@ -1,4 +1,4 @@
-package fetch
+package chrome
 
 import (
 	"context"
@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"net/url"
 	"time"
-
-	"github.com/bobbytrapz/hinatazaka/options"
 )
+
+// UserAgent to use when fetching
+var UserAgent = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36`
 
 // we use for fetching pages and for remote control of chrome
 var httpClient = http.Client{
@@ -16,8 +17,6 @@ var httpClient = http.Client{
 }
 
 func newRequest(ctx context.Context, host string, method string, url string) (req *http.Request, err error) {
-	ua := options.Get("user_agent")
-
 	req, err = http.NewRequest(method, url, nil)
 	if err != nil {
 		err = fmt.Errorf("fetch.newRequest")
@@ -34,15 +33,15 @@ func newRequest(ctx context.Context, host string, method string, url string) (re
 	req.Header.Add("Host", host)
 	req.Header.Add("Pragma", "no-cache")
 	req.Header.Add("Upgrade-Insecure-Requests", "1")
-	req.Header.Add("User-Agent", ua)
+	req.Header.Add("User-Agent", UserAgent)
 
 	req = req.WithContext(ctx)
 
 	return
 }
 
-// Get a page
-func Get(ctx context.Context, link string) (*http.Response, error) {
+// Fetch a page
+func Fetch(ctx context.Context, link string) (*http.Response, error) {
 	u, err := url.ParseRequestURI(link)
 	if err != nil {
 		panic("fetch.Get: invalid url" + link)

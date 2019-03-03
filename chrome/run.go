@@ -11,8 +11,6 @@ import (
 	"runtime"
 	"sync"
 	"time"
-
-	"github.com/bobbytrapz/hinatazaka/fetch"
 )
 
 var rw sync.RWMutex
@@ -124,7 +122,7 @@ func connect(ctx context.Context, addr string) (err error) {
 			Log("chrome.connect: timeout")
 			return errors.New("chrome.connect: timeout")
 		default:
-			res, err := fetch.Get(ctx, u.String())
+			res, err := Fetch(ctx, u.String())
 			if err == nil {
 				res.Body.Close()
 				goto connected

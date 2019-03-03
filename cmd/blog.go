@@ -13,6 +13,8 @@ import (
 
 	"github.com/bobbytrapz/hinatazaka/chrome"
 	"github.com/bobbytrapz/hinatazaka/members"
+	"github.com/bobbytrapz/hinatazaka/options"
+	"github.com/bobbytrapz/hinatazaka/scrape"
 	"github.com/spf13/cobra"
 )
 
@@ -48,9 +50,12 @@ var blogCmd = &cobra.Command{
 			panic(err)
 		}
 
+		y, m, d := time.Now().Date()
+		today := time.Date(y, m, d, 0, 0, 0, 0, loc)
+
 		if saveBlogsSince == "" {
 			// default to today's blogs
-			since = time.Now().In(loc)
+			since = today
 			return nil
 		}
 
@@ -61,26 +66,26 @@ var blogCmd = &cobra.Command{
 			return nil
 		case "today":
 			// same as default
-			since = time.Now().In(loc)
+			since = today
 			return nil
 		case "yesterday":
-			since = time.Now().In(loc).AddDate(0, 0, -1)
+			since = today.AddDate(0, 0, -1)
 			return nil
 		case "week":
 			// within this week
-			weekday := time.Now().In(loc).Weekday()
-			since = time.Now().AddDate(0, 0, -int(weekday))
+			weekday := today.Weekday()
+			since = today.AddDate(0, 0, -int(weekday))
 			return nil
 		case "month":
 			// within this month
-			day := time.Now().In(loc).Day()
-			since = time.Now().In(loc).AddDate(0, 0, -int(day)+1)
+			day := today.Day()
+			since = today.AddDate(0, 0, -int(day)+1)
 			return nil
 		case "year":
 			// within this year
-			month := time.Now().In(loc).Month()
-			day := time.Now().In(loc).Day()
-			since = time.Now().In(loc).AddDate(0, -int(month)+1, -int(day)+1)
+			month := today.Month()
+			day := today.Day()
+			since = today.AddDate(0, -int(month)+1, -int(day)+1)
 			return nil
 		default:
 			since, err = time.Parse("2006-01-02", saveBlogsSince)
@@ -98,6 +103,8 @@ var blogCmd = &cobra.Command{
 		if verbose {
 			chrome.Log = log.Printf
 		}
+
+		chrome.UserAgent = options.Get("user_agent")
 
 		// start chrome
 		if err := chrome.Start(ctx, userProfileDir, port); err != nil {
@@ -125,7 +132,7 @@ var blogCmd = &cobra.Command{
 		}
 
 		if saveTo != "" {
-			chrome.SaveTo = saveTo
+			scrape.SaveTo = saveTo
 		}
 
 		var wg sync.WaitGroup
@@ -139,7 +146,7 @@ var blogCmd = &cobra.Command{
 					return
 				}
 				fmt.Printf("Saving %s blogs since %s\n", m, since.Format("2006-01-02"))
-				chrome.SaveAllBlogsSince(ctx, link, since, maxSaved)
+				scrape.SaveAllBlogsSince(ctx, link, since, maxSaved)
 			}(member)
 		}
 

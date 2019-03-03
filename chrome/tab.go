@@ -10,7 +10,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/bobbytrapz/hinatazaka/fetch"
 	"github.com/gorilla/websocket"
 )
 
@@ -33,7 +32,7 @@ type TabParams map[string]interface{}
 // get a response from chrome
 func get(ctx context.Context, path string) (res *http.Response, err error) {
 	u := url.URL{Scheme: "http", Host: remoteAddr, Path: path}
-	res, err = fetch.Get(ctx, u.String())
+	res, err = Fetch(ctx, u.String())
 	if err != nil {
 		err = fmt.Errorf("chrome.get: %s", err)
 		return
@@ -245,4 +244,10 @@ func ConnectToTab(ctx context.Context, wsURL string) (tab Tab, err error) {
 	}()
 
 	return
+}
+
+// WaitForLoad waits a few seconds for page to load
+// todo: if we start missing blogs we need to find a better way
+func (t Tab) WaitForLoad() {
+	<-time.After(5 * time.Second)
 }

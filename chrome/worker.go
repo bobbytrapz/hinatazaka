@@ -20,9 +20,30 @@ var WorkerDelay = 30
 
 // TabJob is a job for a TabWorker
 type TabJob struct {
-	Name string    `json:"name"`
-	At   time.Time `json:"at"`
-	Link string    `json:"link"`
+	// 	Name string    `json:"name"`
+	// At   time.Time `json:"at"`
+	Link string
+	Data map[string]interface{}
+}
+
+// GetString from data
+func (tj TabJob) GetString(key string) (string, bool) {
+	data, ok := tj.Data[key]
+	if !ok {
+		return "", ok
+	}
+	value, ok := data.(string)
+	return value, ok
+}
+
+// GetTime from data
+func (tj TabJob) GetTime(key string) (time.Time, bool) {
+	data, ok := tj.Data[key]
+	if !ok {
+		return time.Time{}, ok
+	}
+	value, ok := data.(time.Time)
+	return value, ok
 }
 
 // TabWorker completes TabJobs
