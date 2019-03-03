@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 
 	"github.com/bobbytrapz/hinatazaka/chrome"
@@ -87,6 +88,22 @@ var webCmd = &cobra.Command{
 						].map(el => el.src)
 						.concat([document.querySelector(".single_kv").style.backgroundImage.slice(5, -2)])
 						.toString()`
+					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
+					scrape.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
+				}(link)
+			case "mdpr.jp":
+				wg.Add(1)
+				go func(l string) {
+					defer wg.Done()
+					if !strings.Contains(link, "photo") {
+						// todo: maybe add support for news page
+						fmt.Printf("We need https://mdpr.jp/photo/detail/{num}")
+						return
+					}
+					jsCode := `[...document.querySelectorAll('figure.square > a > img')].map(el => {
+							link = el.src;
+							return link.slice(0, link.indexOf('?'));
+						}).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
 					scrape.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
 				}(link)
