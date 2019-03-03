@@ -50,7 +50,7 @@ var blogCmd = &cobra.Command{
 			panic(err)
 		}
 
-		y, m, d := time.Now().Date()
+		y, m, d := time.Now().In(loc).Date()
 		today := time.Date(y, m, d, 0, 0, 0, 0, loc)
 
 		if saveBlogsSince == "" {
