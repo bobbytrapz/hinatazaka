@@ -122,7 +122,7 @@ var blogCmd = &cobra.Command{
 		uniqueArgs := map[string]bool{}
 		for _, a := range args {
 			if a == "all" {
-				for m := range members.Blog {
+				for m := range members.Blogs {
 					uniqueArgs[m] = true
 				}
 				break

@@ -4,10 +4,10 @@ import (
 	"strings"
 )
 
-// Blog maps names to blog list links
+// Blogs maps names to blog list links
 // todo: update
 // they have not moved to hinatazaka46.com yet
-var Blog = map[string]string{
+var Blogs = map[string]string{
 	"井口眞緒":  "https://www.keyakizaka46.com/s/k46o/diary/member/list?ima=0000&ct=23",
 	"潮紗理菜":  "http://www.keyakizaka46.com/s/k46o/diary/member/list?ima=0000&ct=24",
 	"柿崎芽実":  "http://www.keyakizaka46.com/s/k46o/diary/member/list?ima=0000&ct=25",
@@ -137,5 +137,5 @@ func RealName(name string) string {
 
 // BlogURL of a member by name or nickname
 func BlogURL(name string) string {
-	return Blog[RealName(name)]
+	return Blogs[RealName(name)]
 }
