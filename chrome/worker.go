@@ -27,23 +27,27 @@ type TabJob struct {
 }
 
 // GetString from data
-func (tj TabJob) GetString(key string) (string, bool) {
+func (tj TabJob) GetString(key string) (value string) {
 	data, ok := tj.Data[key]
 	if !ok {
-		return "", ok
+		return
 	}
-	value, ok := data.(string)
-	return value, ok
+	if v, ok := data.(string); ok {
+		return v
+	}
+	return
 }
 
 // GetTime from data
-func (tj TabJob) GetTime(key string) (time.Time, bool) {
+func (tj TabJob) GetTime(key string) (value time.Time) {
 	data, ok := tj.Data[key]
 	if !ok {
-		return time.Time{}, ok
+		return
 	}
-	value, ok := data.(time.Time)
-	return value, ok
+	if v, ok := data.(time.Time); ok {
+		return v
+	}
+	return
 }
 
 // TabWorker completes TabJobs

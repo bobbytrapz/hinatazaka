@@ -306,12 +306,12 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 	visit <- root
 
 	jobFn := func(tab chrome.Tab, job chrome.TabJob) error {
-		name, ok := job.GetString("Name")
-		if !ok {
-			return fmt.Errorf("scrape.SaveAllBlogsSince: could not file 'Name'")
+		name := job.GetString("Name")
+		if name == "" {
+			return fmt.Errorf("scrape.SaveAllBlogsSince: could not find 'Name'")
 		}
-		t, ok := job.GetTime("At")
-		if !ok {
+		t := job.GetTime("At")
+		if t.IsZero() {
 			return fmt.Errorf("scrape.SaveAllBlogsSince: could not find 'At'")
 		}
 		at := t.Format("2006-01-02")
