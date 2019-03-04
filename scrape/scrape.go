@@ -89,6 +89,7 @@ type ResJSBlog struct {
 
 // Blog is an individual blog
 type Blog struct {
+	Title string     `json:"title"`
 	Name  string     `json:"name"`
 	Year  int        `json:"year"`
 	Month time.Month `json:"month"`
@@ -103,14 +104,16 @@ type Blog struct {
 // the page urls are provided to the spider
 var jsBlogs = `
 JSON.stringify({
-	pages: [...document.querySelectorAll('.pager a')].map(el => el.href),
-	blogs: [...document.querySelectorAll('article > .innerHead')].map(el => {
+    pages: [...document.querySelectorAll('.pager a')].map(el => el.href),
+    blogs: [...document.querySelectorAll('article > .innerHead')].map(el => {
     name = el.querySelector('.box-ttl .name').textContent.trim();
     link = el.querySelector('.box-ttl a').href;
     t = el.querySelectorAll('.box-date > time');
     [year, month] = t[0].textContent.split('.')
     day = t[1].textContent;
+    title = el.querySelector('.box-ttl > h3').textContent.trim();
     return {
+      title: title,
       name: name,
       year: parseInt(year),
       month: parseInt(month),
@@ -288,8 +291,9 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 					jobs <- chrome.TabJob{
 						Link: b.Link,
 						Data: map[string]interface{}{
-							"Name": b.Name,
-							"At":   at,
+							"Title": b.Title,
+							"Name":  b.Name,
+							"At":    at,
 						},
 					}
 					count++
@@ -329,6 +333,7 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 		}
 
 		fmt.Println("[save]", job.Link)
+		fmt.Println("[title]", job.GetString("Title"))
 		SaveBlogFromTab(ctx, tab, job.Link, saveBlogAs, saveImagesTo)
 
 		return nil
