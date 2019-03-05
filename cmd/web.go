@@ -107,6 +107,14 @@ var webCmd = &cobra.Command{
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
 					scrape.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
 				}(link)
+			case "tokyopopline.com":
+				wg.Add(1)
+				go func(l string) {
+					defer wg.Done()
+					jsCode := `[document.querySelector('main').querySelector(".entry-thumbnail > img"), ...document.querySelectorAll('.gallery-icon > a')].map(el => el.src || el.href).toString()`
+					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
+					scrape.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
+				}(link)
 			default:
 				fmt.Println("We cannot handle:", link)
 			}
