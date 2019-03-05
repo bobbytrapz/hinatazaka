@@ -93,7 +93,7 @@ func Start(ctx context.Context, userProfileDir string, port int) (err error) {
 		defer wg.Done()
 		select {
 		case <-ctx.Done():
-			Log("chrome.Run: %s", ctx.Err())
+			Log("chrome.Run: cancel: %s", ctx.Err())
 			return
 		case err := <-exit:
 			Log("chrome.Run: exited: %s", err)
