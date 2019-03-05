@@ -78,7 +78,7 @@ func (t Tab) PageSetLifecycleEventsEnabled(shouldEnable bool) {
 	t.Command("Page.setLifecycleEventsEnabled", TabParams{
 		"enabled": shouldEnable,
 	})
-	// wait for reponse
+	// wait for response
 	data := <-t.recv
 	var res ResPageSetLifecycleEventsEnabled
 	err := json.Unmarshal(data, &res)
@@ -100,7 +100,7 @@ func (t Tab) PageNavigate(url string) {
 	t.Command("Page.navigate", TabParams{
 		"url": url,
 	})
-	// wait for reponse
+	// wait for response
 	data := <-t.recv
 	var res ResPageNavigate
 	err := json.Unmarshal(data, &res)
@@ -125,7 +125,7 @@ type ResPageCaptureScreenshot struct {
 func (t Tab) PageCaptureScreenshot(saveAs string) {
 	// use defaults "png"
 	t.Command("Page.captureScreenshot", TabParams{})
-	// wait for reponse
+	// wait for response
 	data := <-t.recv
 	var res ResPageCaptureScreenshot
 	err := json.Unmarshal(data, &res)
@@ -163,7 +163,7 @@ func (t Tab) PagePrintToPDF(saveAs string) {
 		"marginLeft":          0,
 		"marginRight":         0,
 	})
-	// wait for reponse
+	// wait for response
 	data := <-t.recv
 	var res ResPagePrintToPDF
 	err := json.Unmarshal(data, &res)
