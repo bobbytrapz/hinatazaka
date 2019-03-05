@@ -74,7 +74,6 @@ func Start(ctx context.Context, userProfileDir string, port int) (err error) {
 	}
 	chrome = exec.CommandContext(ctx, app, opts...)
 
-	wg.Add(1)
 	if err = chrome.Start(); err != nil {
 		err = fmt.Errorf("chrome.Run: %s", err)
 		return
@@ -82,6 +81,7 @@ func Start(ctx context.Context, userProfileDir string, port int) (err error) {
 	Log("chrome.Run: %s (%d)", chrome.Path, chrome.Process.Pid)
 
 	// monitor process
+	wg.Add(1)
 	exit := make(chan error)
 	go func() {
 		err := chrome.Wait()
