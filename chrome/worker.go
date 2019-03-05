@@ -113,7 +113,7 @@ func NewTabWorkers(ctx context.Context, N int, jobFn func(Tab, TabJob) error) (t
 					return
 				case <-w.stop:
 					w.tab.PageClose()
-					tw.wg.Done()
+					// tw.wg.Done()
 					return
 				case job := <-w.job:
 					if err := jobFn(w.tab, job); err != nil {
@@ -140,12 +140,12 @@ func NewTabWorkers(ctx context.Context, N int, jobFn func(Tab, TabJob) error) (t
 				return
 			case <-tw.stop:
 				// stop tab workers
-				tw.wg.Add(N)
+				// tw.wg.Add(N)
 				for _, w := range tw.w {
 					close(w.stop)
 				}
 				// wait for tabs to close
-				tw.Wait()
+				// tw.Wait()
 				return
 			case job := <-tw.job:
 				go func(tj TabJob) {
