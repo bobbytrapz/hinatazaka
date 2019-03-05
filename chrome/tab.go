@@ -47,6 +47,7 @@ func DumpProtocol() {
 	if err != nil {
 		panic(err)
 	}
+	defer res.Body.Close()
 
 	io.Copy(os.Stdout, res.Body)
 }
@@ -185,13 +186,13 @@ func ConnectToTab(ctx context.Context, wsURL string) (tab Tab, err error) {
 			_, data, err := remote.ReadMessage()
 			// Log("chrome.ConnectToTab: got: %s", data)
 			if err != nil {
-				Log("chrome.ConnectToTab: %s", err)
+				Log("chrome.ConnectToTab: closed: %s", err)
 				return
 			}
 			var msg ResChrome
 			err = json.Unmarshal(data, &msg)
 			if err != nil {
-				Log("chrome.ConnectToTab: %s", err)
+				Log("chrome.ConnectToTab: json: %s", err)
 				return
 			}
 			switch msg.Method {
@@ -199,18 +200,18 @@ func ConnectToTab(ctx context.Context, wsURL string) (tab Tab, err error) {
 				var ev EvPageLifecycle
 				err := json.Unmarshal(msg.Params, &ev)
 				if err != nil {
-					Log("chrome.ConnectToTab: %s", err)
+					Log("chrome.ConnectToTab: Page.lifecycleEvent: %s", err)
 					return
 				}
-				Log("chrome.ConnectToTab: ev: %+v", ev)
+				Log("chrome.ConnectToTab: Page.lifecycleEvent: ev: %+v", ev)
 			case "Inspector.detached":
 				var ev EvInspectorDetached
 				err := json.Unmarshal(msg.Params, &ev)
 				if err != nil {
-					Log("chrome.ConnectToTab: %s", err)
+					Log("chrome.ConnectToTab: Inspector.detached: %s", err)
 					return
 				}
-				Log("chrome.ConnectToTab: ev: %+v", ev)
+				Log("chrome.ConnectToTab: Inspector.detached: ev: %+v", ev)
 				close(tab.closed)
 			default:
 				tab.recv <- msg.Result
