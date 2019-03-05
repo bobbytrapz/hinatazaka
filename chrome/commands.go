@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"time"
 )
 
 var nextReqID = -1
@@ -64,7 +65,13 @@ func (t Tab) Command(method string, params TabParams) {
 
 // Wait for a response
 func (t Tab) Wait() []byte {
-	return <-t.recv
+	select {
+	case v := <-t.recv:
+		return v
+	case <-time.After(5 * time.Second):
+		Log("tab.Wait: timeout")
+		return nil
+	}
 }
 
 // ResPageSetLifecycleEventsEnabled is a response
