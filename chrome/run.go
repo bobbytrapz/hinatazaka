@@ -82,10 +82,10 @@ func Start(ctx context.Context, userProfileDir string, port int) (err error) {
 
 	// monitor process
 	wg.Add(1)
-	exit := make(chan error)
+	exit := make(chan struct{}, 1)
 	go func() {
-		err := cmd.Wait()
-		exit <- err
+		cmd.Wait()
+		close(exit)
 	}()
 
 	// handle exit
@@ -95,8 +95,8 @@ func Start(ctx context.Context, userProfileDir string, port int) (err error) {
 		case <-ctx.Done():
 			Log("chrome.Run: cancel: %s", ctx.Err())
 			return
-		case err := <-exit:
-			Log("chrome.Run: exited: %s", err)
+		case <-exit:
+			Log("chrome.Run: exited")
 			return
 		}
 	}()
