@@ -16,7 +16,7 @@ import (
 var rw sync.RWMutex
 var wg sync.WaitGroup
 
-var chrome *exec.Cmd
+var cmd *exec.Cmd
 
 // Log function
 var Log = func(string, ...interface{}) {}
@@ -72,19 +72,19 @@ func Start(ctx context.Context, userProfileDir string, port int) (err error) {
 		err = fmt.Errorf("chrome.Run: Could not find chrome")
 		return
 	}
-	chrome = exec.CommandContext(ctx, app, opts...)
+	cmd = exec.CommandContext(ctx, app, opts...)
 
-	if err = chrome.Start(); err != nil {
+	if err = cmd.Start(); err != nil {
 		err = fmt.Errorf("chrome.Run: %s", err)
 		return
 	}
-	Log("chrome.Run: %s (%d)", chrome.Path, chrome.Process.Pid)
+	Log("chrome.Run: %s (%d)", cmd.Path, cmd.Process.Pid)
 
 	// monitor process
 	wg.Add(1)
 	exit := make(chan error)
 	go func() {
-		err := chrome.Wait()
+		err := cmd.Wait()
 		exit <- err
 	}()
 
