@@ -214,7 +214,12 @@ func ConnectToTab(ctx context.Context, wsURL string) (tab Tab, err error) {
 				Log("chrome.ConnectToTab: Inspector.detached: ev: %+v", ev)
 				close(tab.closed)
 			default:
-				tab.recv <- msg.Result
+				select {
+				case tab.recv <- msg.Result:
+					Log("chrome.ConnectToTab: result: %+v", msg.Result)
+				case <-time.After(500 * time.Millisecond):
+					Log("chrome.ConnectToTab: result: timeout")
+				}
 			}
 		}
 	}()
