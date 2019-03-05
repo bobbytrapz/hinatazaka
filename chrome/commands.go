@@ -60,7 +60,12 @@ func (t Tab) Command(method string, params TabParams) {
 	fmt.Fprintf(&buf, `}`)
 
 	fmt.Fprintf(&buf, `}`)
-	t.send <- buf.Bytes()
+	select {
+	case t.send <- buf.Bytes():
+		Log("chrome.Tab.Command: send: %+v", buf.Bytes())
+	case <-time.After(500 * time.Millisecond):
+		Log("chrome.Tab.Command: send: timeout")
+	}
 }
 
 // Wait for a response
@@ -69,7 +74,7 @@ func (t Tab) Wait() []byte {
 	case v := <-t.recv:
 		return v
 	case <-time.After(5 * time.Second):
-		Log("tab.Wait: timeout")
+		Log("chrome.Tab.Wait: timeout")
 		return nil
 	}
 }
