@@ -115,6 +115,18 @@ var webCmd = &cobra.Command{
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
 					scrape.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
 				}(link)
+			case "taishu.jp":
+				wg.Add(1)
+				go func(l string) {
+					defer wg.Done()
+					if !strings.Contains(link, "photo") {
+						fmt.Printf("We need https://taishu.jp/photo/{num}")
+						return
+					}
+					jsCode := `[...document.querySelectorAll('.swiper-slide > figure > img')].map(el => el.src).toString()`
+					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
+					scrape.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
+				}(link)
 			default:
 				fmt.Println("We cannot handle:", link)
 			}
