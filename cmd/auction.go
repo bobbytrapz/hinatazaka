@@ -46,7 +46,7 @@ var auctionCmd = &cobra.Command{
 	Use:   "auction [names]",
 	Short: "Estimate auction value of goods from Yahoo Auctions given keywords.",
 	Long: `Estimate auction value of goods from Yahoo Auctions given keywords.
-We use the median order value of the top winning bids.
+We use the median closing bid value of the most recent bids.
 `,
 	Args: func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) < 1 {

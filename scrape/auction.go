@@ -24,7 +24,7 @@ const resPricesMOV = `
 `
 
 // MedianClosingBidValue the given idol using the given keywords
-// by calculating the median closing bid value of the top latest bids
+// by calculating the median closing bid value of the most recent bids
 func MedianClosingBidValue(ctx context.Context, name string, keywords []string) (median float32, err error) {
 	tab, err := chrome.ConnectToNewTab(ctx)
 	if err != nil {
