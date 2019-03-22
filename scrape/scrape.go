@@ -36,6 +36,14 @@ type ResJSInt struct {
 	} `json:"result"`
 }
 
+// ResJSFloat32 is a response
+type ResJSFloat32 struct {
+	Result struct {
+		Type  string  `json:"type"`
+		Value float32 `json:"value"`
+	} `json:"result"`
+}
+
 // SaveImagesFrom a webpage
 func SaveImagesFrom(ctx context.Context, link string, saveImagesTo string, jsCode string) error {
 	tab, err := chrome.ConnectToNewTab(ctx)
