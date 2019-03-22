@@ -25,21 +25,21 @@ func init() {
 }
 
 type res struct {
-	Name string
-	MOV  float32
+	Name  string
+	Value float32
 }
-type byMOV []res
+type byValue []res
 
-func (s byMOV) Len() int {
+func (s byValue) Len() int {
 	return len(s)
 }
 
-func (s byMOV) Swap(a, b int) {
+func (s byValue) Swap(a, b int) {
 	s[a], s[b] = s[b], s[a]
 }
 
-func (s byMOV) Less(a, b int) bool {
-	return s[a].MOV < s[b].MOV
+func (s byValue) Less(a, b int) bool {
+	return s[a].Value < s[b].Value
 }
 
 var auctionCmd = &cobra.Command{
@@ -96,9 +96,9 @@ We use the median order value of the top winning bids.
 			wg.Add(1)
 			go func(member string) {
 				defer wg.Done()
-				mov, err := scrape.BidsMedianOrderValue(ctx, member, keywords)
+				median, err := scrape.MedianClosingBidValue(ctx, member, keywords)
 				if err == nil {
-					results = append(results, res{member, mov})
+					results = append(results, res{member, median})
 				} else {
 					panic(err)
 				}
@@ -106,9 +106,9 @@ We use the median order value of the top winning bids.
 		}
 
 		defer func() {
-			sort.Sort(sort.Reverse(byMOV(results)))
+			sort.Sort(sort.Reverse(byValue(results)))
 			for _, r := range results {
-				fmt.Printf("[%s] %.2f\n", r.Name, r.MOV)
+				fmt.Printf("[%s] %.2f\n", r.Name, r.Value)
 			}
 		}()
 

@@ -22,9 +22,9 @@ const jsPricesMOV = `
 const resPricesMOV = `
 `
 
-// BidsMedianOrderValue the given idol using the given keywords
-// by calculating the median order value of the top winning bids
-func BidsMedianOrderValue(ctx context.Context, name string, keywords []string) (mov float32, err error) {
+// MedianClosingBidValue the given idol using the given keywords
+// by calculating the median closing bid value of the top latest bids
+func MedianClosingBidValue(ctx context.Context, name string, keywords []string) (median float32, err error) {
 	tab, err := chrome.ConnectToNewTab(ctx)
 	if err != nil {
 		err = fmt.Errorf("scrape.BidsMedianOrderValue: %s", err)
@@ -57,7 +57,7 @@ func BidsMedianOrderValue(ctx context.Context, name string, keywords []string) (
 		chrome.Log("scrape.BidsMedianOrderValue: %s", err)
 	}
 	chrome.Log("scrape.BidsMedianOrderValue: res: %+v", res)
-	mov = res.Result.Value
+	median = res.Result.Value
 
 	return
 }
