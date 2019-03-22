@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/bobbytrapz/hinatazaka/chrome"
 )
@@ -43,7 +44,9 @@ func MedianClosingBidValue(ctx context.Context, name string, keywords []string) 
 	fmt.Println("[link]", link)
 
 	tab.PageNavigate(link)
-	tab.WaitForLoad()
+	// note: it takes a bit to load up since there are more items on a page
+	// so we wait a bit longer
+	<-time.After(10 * time.Second)
 
 	tab.Command("Runtime.evaluate", chrome.TabParams{
 		"expression": jsPricesMOV,
