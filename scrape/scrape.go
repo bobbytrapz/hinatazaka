@@ -28,6 +28,14 @@ type ResJSString struct {
 	} `json:"result"`
 }
 
+// ResJSInt is a response
+type ResJSInt struct {
+	Result struct {
+		Type  string `json:"type"`
+		Value int    `json:"value"`
+	} `json:"result"`
+}
+
 // SaveImagesFrom a webpage
 func SaveImagesFrom(ctx context.Context, link string, saveImagesTo string, jsCode string) error {
 	tab, err := chrome.ConnectToNewTab(ctx)
