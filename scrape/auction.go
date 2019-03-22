@@ -1,0 +1,63 @@
+package scrape
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"strings"
+
+	"github.com/bobbytrapz/hinatazaka/chrome"
+)
+
+const jsPricesMOV = `
+(() => {
+	const prices = [...document.querySelectorAll('.ePrice')].map(el => {
+		return parseInt(el.innerText.replace(',', ''));
+	}).sort();
+	const mid = Math.floor(prices.length / 2);
+	return prices.length % 2 == 0 ? (prices[mid-1] + prices[mid]) / 2 : prices[mid];
+})()
+`
+
+const resPricesMOV = `
+`
+
+// BidsMedianOrderValue the given idol using the given keywords
+// by calculating the median order value of the top winning bids
+func BidsMedianOrderValue(ctx context.Context, name string, keywords []string) (mov float32, err error) {
+	tab, err := chrome.ConnectToNewTab(ctx)
+	if err != nil {
+		err = fmt.Errorf("scrape.BidsMedianOrderValue: %s", err)
+		return
+	}
+	defer tab.PageClose()
+
+	endpoint := `https://auctions.yahoo.co.jp/closedsearch/closedsearch?p=%s&va=%s&b=1&n=%d&select=2&slider=undefined`
+	keywords = append(keywords, name)
+	params := strings.Join(keywords, "+")
+
+	perPage := 100
+	p := params
+	va := params
+	link := fmt.Sprintf(endpoint, p, va, perPage)
+	fmt.Println("[link]", link)
+
+	tab.PageNavigate(link)
+	tab.WaitForLoad()
+
+	tab.Command("Runtime.evaluate", chrome.TabParams{
+		"expression": jsPricesMOV,
+	})
+
+	// wait for reponse
+	data := tab.Wait()
+	var res ResJSFloat32
+	err = json.Unmarshal(data, &res)
+	if err != nil {
+		chrome.Log("scrape.BidsMedianOrderValue: %s", err)
+	}
+	chrome.Log("scrape.BidsMedianOrderValue: res: %+v", res)
+	mov = res.Result.Value
+
+	return
+}

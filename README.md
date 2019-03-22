@@ -50,6 +50,7 @@ Items supported so far:
 
 - blog: pdf printout of blog and each image
 - web: scrape images from a webpage only hustlepress supported so far
+- auction: estimates Yahoo auction value based on custom keywords
 
 ## Other Groups
 
