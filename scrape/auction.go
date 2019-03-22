@@ -27,7 +27,7 @@ const resPricesMOV = `
 func MedianClosingBidValue(ctx context.Context, name string, keywords []string) (median float32, err error) {
 	tab, err := chrome.ConnectToNewTab(ctx)
 	if err != nil {
-		err = fmt.Errorf("scrape.BidsMedianOrderValue: %s", err)
+		err = fmt.Errorf("scrape.MedianClosingBidValue: %s", err)
 		return
 	}
 	defer tab.PageClose()
@@ -54,9 +54,9 @@ func MedianClosingBidValue(ctx context.Context, name string, keywords []string) 
 	var res ResJSFloat32
 	err = json.Unmarshal(data, &res)
 	if err != nil {
-		chrome.Log("scrape.BidsMedianOrderValue: %s", err)
+		chrome.Log("scrape.MedianClosingBidValue: %s", err)
 	}
-	chrome.Log("scrape.BidsMedianOrderValue: res: %+v", res)
+	chrome.Log("scrape.MedianClosingBidValue: res: %+v", res)
 	median = res.Result.Value
 
 	return
