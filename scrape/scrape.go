@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/bobbytrapz/hinatazaka/chrome"
+	"github.com/bobbytrapz/chrome"
 	"github.com/bobbytrapz/hinatazaka/options"
 )
 

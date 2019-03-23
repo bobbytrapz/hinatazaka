@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bobbytrapz/hinatazaka/chrome"
+	"github.com/bobbytrapz/chrome"
 )
 
 // uses Array toString() to make a comma-separated list of image urls

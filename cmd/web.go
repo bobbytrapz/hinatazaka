@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bobbytrapz/hinatazaka/chrome"
+	"github.com/bobbytrapz/chrome"
 	"github.com/bobbytrapz/hinatazaka/options"
 	"github.com/bobbytrapz/hinatazaka/scrape"
 	"github.com/spf13/cobra"

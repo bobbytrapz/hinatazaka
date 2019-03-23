@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bobbytrapz/hinatazaka/chrome"
+	"github.com/bobbytrapz/chrome"
 )
 
 const jsPricesMOV = `

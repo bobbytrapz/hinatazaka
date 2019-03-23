@@ -10,7 +10,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/bobbytrapz/hinatazaka/chrome"
+	"github.com/bobbytrapz/chrome"
 	"github.com/bobbytrapz/hinatazaka/members"
 	"github.com/bobbytrapz/hinatazaka/options"
 	"github.com/bobbytrapz/hinatazaka/scrape"
