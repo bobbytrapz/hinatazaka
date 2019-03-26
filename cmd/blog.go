@@ -88,10 +88,12 @@ var blogCmd = &cobra.Command{
 			since = today.AddDate(0, -int(month)+1, -int(day)+1)
 			return nil
 		default:
-			since, err = time.Parse("2006-01-02", saveBlogsSince)
+			t, err := time.Parse("2006-01-02", saveBlogsSince)
 			if err != nil {
 				return err
 			}
+			y, m, d := t.In(loc).Date()
+			since = time.Date(y, m, d, 0, 0, 0, 0, loc)
 			return nil
 		}
 	},
