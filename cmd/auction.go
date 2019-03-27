@@ -92,7 +92,8 @@ You can use 'photos' as the final keyword to append built-in keywords.
 
 		for ndx, kw := range keywords {
 			if kw == "photos" {
-				keywords = append(keywords[:ndx], "コンプ", "-セミ", "封入")
+				keywords = append(keywords[:ndx],
+					"日向坂", "生写真", "封入", "コンプ", "-セミ", "-60")
 				break
 			}
 		}
