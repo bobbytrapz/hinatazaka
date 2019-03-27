@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/bobbytrapz/chrome"
 	"github.com/bobbytrapz/hinatazaka/options"
@@ -59,7 +60,7 @@ func SaveImagesFrom(ctx context.Context, link string, saveImagesTo string, jsCod
 // then it downloads each image from a list of comma-separated urls
 func SaveImagesFromTabWith(ctx context.Context, tab chrome.Tab, link string, saveTo string, jsCode string) {
 	tab.PageNavigate(link)
-	tab.WaitForLoad()
+	tab.WaitForLoad(10 * time.Second)
 
 	tab.Command("Runtime.evaluate", chrome.TabParams{
 		"expression": jsCode,

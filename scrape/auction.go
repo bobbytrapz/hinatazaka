@@ -46,7 +46,7 @@ func MedianClosingBidValue(ctx context.Context, name string, keywords []string) 
 	tab.PageNavigate(link)
 	// note: it takes a bit to load up since there are more items on a page
 	// so we wait a bit longer
-	<-time.After(10 * time.Second)
+	tab.WaitForLoad(20 * time.Second)
 
 	tab.Command("Runtime.evaluate", chrome.TabParams{
 		"expression": jsPricesMOV,
