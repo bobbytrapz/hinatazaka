@@ -17,7 +17,7 @@ import (
 )
 
 // uses Array toString() to make a comma-separated list of image urls
-var jsBlogImages = `[...document.querySelectorAll(':scope article img:not(.emoji)')].map(el => el.src).toString()`
+var jsBlogImages = `[...document.querySelectorAll(':scope .p-blog-article img:not(.emoji)')].map(el => el.src).toString()`
 
 // SaveBlogImagesFromTab sends javascript to get urls for blog images
 func SaveBlogImagesFromTab(ctx context.Context, tab chrome.Tab, saveTo string) {
@@ -88,14 +88,14 @@ type Blog struct {
 // the page urls are provided to the spider
 var jsBlogs = `
 JSON.stringify({
-    pages: [...document.querySelectorAll('.pager a')].map(el => el.href),
-    blogs: [...document.querySelectorAll('article > .innerHead')].map(el => {
-    name = el.querySelector('.box-ttl .name').textContent.trim();
-    link = el.querySelector('.box-ttl a').href;
-    t = el.querySelectorAll('.box-date > time');
-    [year, month] = t[0].textContent.split('.')
-    day = t[1].textContent;
-    title = el.querySelector('.box-ttl > h3').textContent.trim();
+    pages: [...document.querySelectorAll('.c-pager__item--count a')].map(el => el.href),
+    blogs: [...document.querySelectorAll('.p-blog-article')].map(el => {
+		link = el.querySelector('.p-button__blog_detail > a').href;
+		head = el.querySelector('.p-blog-article__head');
+    name = head.querySelector('.c-blog-article__name').textContent.trim();
+		title = head.querySelector('.c-blog-article__title').textContent.trim();
+		t = head.querySelector('.c-blog-article__date').textContent.trim();
+    [year, month, day] = t.split(' ')[0].split('.');
     return {
       title: title,
       name: name,
@@ -134,8 +134,9 @@ func BlogsFromTab(tab chrome.Tab) (blogs ResJSBlog) {
 // SaveBlogFromTab saves a single individual blog
 func SaveBlogFromTab(ctx context.Context, tab chrome.Tab, link string, saveBlogAs string, saveImagesTo string) {
 	tab.PageNavigate(link)
-	tab.WaitForLoad()
-	tab.PagePrintToPDF(saveBlogAs)
+	tab.WaitForLoad(5 * time.Second)
+	// tab.PagePrintToPDF(saveBlogAs)
+	tab.CaptureSnapshot(saveBlogAs)
 	SaveBlogImagesFromTab(ctx, tab, saveImagesTo)
 }
 
@@ -198,7 +199,7 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 
 				// get list of blogs
 				tab.PageNavigate(link)
-				tab.WaitForLoad()
+				tab.WaitForLoad(10 * time.Second)
 				res := BlogsFromTab(tab)
 				for _, b := range res.Blogs {
 					if count >= maxSaved {
@@ -251,7 +252,7 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 		h.Write([]byte(job.Link))
 		hash := base32.StdEncoding.EncodeToString(h.Sum(nil))
 		saveImagesTo := filepath.Join(SaveTo, name, at)
-		saveBlogAs := filepath.Join(saveImagesTo, fmt.Sprintf("%s.pdf", hash))
+		saveBlogAs := filepath.Join(saveImagesTo, fmt.Sprintf("%s.mhtml", hash))
 
 		err := os.MkdirAll(saveImagesTo, os.ModePerm)
 		if err != nil {
