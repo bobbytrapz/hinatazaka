@@ -47,6 +47,7 @@ var auctionCmd = &cobra.Command{
 	Short: "Estimate auction value of goods from Yahoo Auctions given keywords.",
 	Long: `Estimate auction value of goods from Yahoo Auctions given keywords.
 We use the median closing bid value of the most recent bids.
+You can use 'photos' as the final keyword to append built-in keywords.
 `,
 	Args: func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) < 1 {
@@ -87,6 +88,13 @@ We use the median closing bid value of the most recent bids.
 			}
 			addArg := members.RealName(a)
 			uniqueArgs[addArg] = true
+		}
+
+		for ndx, kw := range keywords {
+			if kw == "photos" {
+				keywords = append(keywords[:ndx], "コンプ", "-セミ", "封入")
+				break
+			}
 		}
 
 		var wg sync.WaitGroup
