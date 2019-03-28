@@ -19,13 +19,16 @@ import (
 )
 
 var saveBlogsSince string
+var saveBlogsOn string
 var saveTo string
 var maxSaved int
 var since time.Time
+var on time.Time
 
 func init() {
 	rootCmd.AddCommand(blogCmd)
 	blogCmd.Flags().StringVar(&saveBlogsSince, "since", "", "Save any blogs newer than this date ex: 2019-03-27")
+	blogCmd.Flags().StringVar(&saveBlogsOn, "on", "", "Save any blogs posted on this date ex: 2019-03-27")
 	blogCmd.Flags().IntVar(&maxSaved, "count", math.MaxInt32, "The max number of blogs to save.")
 	blogCmd.Flags().StringVar(&saveTo, "saveto", "", "Directory path to save blog data to")
 }
@@ -48,6 +51,16 @@ var blogCmd = &cobra.Command{
 		loc, err := time.LoadLocation("Asia/Tokyo")
 		if err != nil {
 			panic(err)
+		}
+
+		if saveBlogsOn != "" {
+			t, err := time.Parse("2006-01-02", saveBlogsOn)
+			if err != nil {
+				return err
+			}
+			y, m, d := t.In(loc).Date()
+			on = time.Date(y, m, d, 0, 0, 0, 0, loc)
+			return nil
 		}
 
 		y, m, d := time.Now().In(loc).Date()
@@ -98,6 +111,23 @@ var blogCmd = &cobra.Command{
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		// unique args
+		uniqueArgs := map[string]bool{}
+		for _, a := range args {
+			if a == "all" {
+				for m := range members.Blogs {
+					uniqueArgs[m] = true
+				}
+				break
+			}
+			addArg := members.RealName(a)
+			if _, ok := members.Blogs[addArg]; !ok {
+				fmt.Printf("We do not know who %q is.\n", a)
+				return
+			}
+			uniqueArgs[addArg] = true
+		}
+
 		ctx := context.Background()
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
@@ -113,43 +143,42 @@ var blogCmd = &cobra.Command{
 			panic(err)
 		}
 
+		// chrome.DumpProtocol()
+
 		// wait for chrome to close
 		defer func() {
 			chrome.Wait()
 		}()
-
-		// chrome.DumpProtocol()
-
-		// unique args
-		uniqueArgs := map[string]bool{}
-		for _, a := range args {
-			if a == "all" {
-				for m := range members.Blogs {
-					uniqueArgs[m] = true
-				}
-				break
-			}
-			addArg := members.RealName(a)
-			uniqueArgs[addArg] = true
-		}
 
 		if saveTo != "" {
 			scrape.SaveTo = saveTo
 		}
 
 		var wg sync.WaitGroup
-		for member := range uniqueArgs {
+
+		// if --on is used --since is ignored
+		if saveBlogsOn != "" {
+			fmt.Printf("Saving blogs posted on %s\n", on.Format("2006-01-02"))
 			wg.Add(1)
-			go func(m string) {
+			go func() {
 				defer wg.Done()
-				link := members.BlogURL(m)
-				if link == "" {
-					fmt.Printf("We do not know who %q is.\n", m)
-					return
-				}
-				fmt.Printf("Saving %s blogs since %s\n", m, since.Format("2006-01-02"))
-				scrape.SaveAllBlogsSince(ctx, link, since, maxSaved)
-			}(member)
+				scrape.SaveBlogsOn(ctx, uniqueArgs, on, maxSaved)
+			}()
+		} else {
+			// save blogs since
+			for member := range uniqueArgs {
+				wg.Add(1)
+				go func(m string) {
+					defer wg.Done()
+					link := members.BlogURL(m)
+					if link == "" {
+						fmt.Printf("Missing blog url for %q.\n", m)
+						return
+					}
+					fmt.Printf("Saving %s blogs since %s\n", m, since.Format("2006-01-02"))
+					scrape.SaveAllBlogsSince(ctx, link, since, maxSaved)
+				}(member)
+			}
 		}
 
 		go func() {

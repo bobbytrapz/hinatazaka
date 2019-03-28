@@ -134,10 +134,41 @@ func BlogsFromTab(tab chrome.Tab) (blogs ResJSBlog) {
 // SaveBlogFromTab saves a single individual blog
 func SaveBlogFromTab(ctx context.Context, tab chrome.Tab, link string, saveBlogAs string, saveImagesTo string) {
 	tab.PageNavigate(link)
-	tab.WaitForLoad(5 * time.Second)
-	// tab.PagePrintToPDF(saveBlogAs)
+	tab.WaitForLoad(15 * time.Second)
 	tab.CaptureSnapshot(saveBlogAs)
 	SaveBlogImagesFromTab(ctx, tab, saveImagesTo)
+}
+
+func newSaveBlogTabWorkerFn(ctx context.Context) chrome.TabWorkerFn {
+	return func(tab chrome.Tab, job chrome.TabJob) error {
+		name := job.GetString("Name")
+		if name == "" {
+			return fmt.Errorf("scrape.newSaveBlogTabWorkerFn: could not find 'Name'")
+		}
+		t := job.GetTime("At")
+		if t.IsZero() {
+			return fmt.Errorf("scrape.newSaveBlogTabWorkerFn: could not find 'At'")
+		}
+		at := t.Format("2006-01-02")
+
+		h := sha1.New()
+		h.Write([]byte(job.Link))
+		hash := base32.StdEncoding.EncodeToString(h.Sum(nil))
+		saveImagesTo := filepath.Join(SaveTo, name, at)
+		saveBlogAs := filepath.Join(saveImagesTo, fmt.Sprintf("%s.mhtml", hash))
+
+		err := os.MkdirAll(saveImagesTo, os.ModePerm)
+		if err != nil {
+			fmt.Println("[nok]", err)
+			return fmt.Errorf("scrape.newSaveBlogTabWorkerFn: %s", err)
+		}
+
+		fmt.Println("[save]", job.Link)
+		fmt.Println("[title]", job.GetString("Title"))
+		SaveBlogFromTab(ctx, tab, job.Link, saveBlogAs, saveImagesTo)
+
+		return nil
+	}
 }
 
 // SaveAllBlogs gets the list of blogs and save them all
@@ -237,35 +268,78 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 	}()
 	visit <- root
 
-	jobFn := func(tab chrome.Tab, job chrome.TabJob) error {
-		name := job.GetString("Name")
-		if name == "" {
-			return fmt.Errorf("scrape.SaveAllBlogsSince: could not find 'Name'")
-		}
-		t := job.GetTime("At")
-		if t.IsZero() {
-			return fmt.Errorf("scrape.SaveAllBlogsSince: could not find 'At'")
-		}
-		at := t.Format("2006-01-02")
+	jobFn := newSaveBlogTabWorkerFn(ctx)
 
-		h := sha1.New()
-		h.Write([]byte(job.Link))
-		hash := base32.StdEncoding.EncodeToString(h.Sum(nil))
-		saveImagesTo := filepath.Join(SaveTo, name, at)
-		saveBlogAs := filepath.Join(saveImagesTo, fmt.Sprintf("%s.mhtml", hash))
+	// make some tab workers
+	tw := chrome.NewTabWorkers(ctx, NumTabWorkersPerMember, jobFn)
 
-		err := os.MkdirAll(saveImagesTo, os.ModePerm)
-		if err != nil {
-			fmt.Println("[nok]", err)
-			return fmt.Errorf("scrape.SaveAllBlogsSince: %s", err)
-		}
-
-		fmt.Println("[save]", job.Link)
-		fmt.Println("[title]", job.GetString("Title"))
-		SaveBlogFromTab(ctx, tab, job.Link, saveBlogAs, saveImagesTo)
-
-		return nil
+	// distribute jobs
+	for tj := range jobs {
+		tw.Add(tj)
 	}
+	// wait for all our jobs to finish
+	tw.Wait()
+	// remove all the worker tabs
+	tw.Stop()
+	fmt.Println("[saved]", count, "blogs")
+
+	return nil
+}
+
+// SaveBlogsOn finds up to maxSaved blogs on a given date and saves them
+func SaveBlogsOn(ctx context.Context, names map[string]bool, on time.Time, maxSaved int) error {
+	jobs := make(chan chrome.TabJob)
+	dy := fmt.Sprintf("%04d%02d%02d", on.Year(), on.Month(), on.Day())
+	listPage := fmt.Sprintf("https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&dy=%s", dy)
+
+	// use tokyo time
+	// note: we do not really need this here for now
+	loc, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		panic(err)
+	}
+
+	tab, err := chrome.ConnectToNewTab(ctx)
+	if err != nil {
+		return fmt.Errorf("scrape.SaveBlogsOn: %s", err)
+	}
+	count := 0
+
+	go func() {
+		// get list of blogs
+		fmt.Println("[visit]", listPage)
+		tab.PageNavigate(listPage)
+		tab.WaitForLoad(10 * time.Second)
+		res := BlogsFromTab(tab)
+
+		for _, b := range res.Blogs {
+			at := time.Date(b.Year, b.Month, b.Day, 0, 0, 0, 0, loc)
+			if count >= maxSaved {
+				chrome.Log("scrape.SaveBlogsOn: reached max blog save count")
+				return
+			}
+
+			author := strings.ReplaceAll(b.Name, " ", "")
+			if _, ok := names[author]; !ok {
+				continue
+			}
+
+			// send each single blog we find for processing by a tab worker
+			jobs <- chrome.TabJob{
+				Link: b.Link,
+				Data: map[string]interface{}{
+					"Title": b.Title,
+					"Name":  b.Name,
+					"At":    at,
+				},
+			}
+			count++
+		}
+
+		close(jobs)
+	}()
+
+	jobFn := newSaveBlogTabWorkerFn(ctx)
 
 	// make some tab workers
 	tw := chrome.NewTabWorkers(ctx, NumTabWorkersPerMember, jobFn)
