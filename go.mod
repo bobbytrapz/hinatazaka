@@ -1,7 +1,7 @@
 module github.com/bobbytrapz/hinatazaka
 
 require (
-	github.com/bobbytrapz/chrome v0.0.0-20190327232414-c08a4fb4e2f8
+	github.com/bobbytrapz/chrome v0.0.0-20190328225127-89a96f8454e3
 	github.com/coreos/etcd v3.3.12+incompatible // indirect
 	github.com/gorilla/websocket v1.4.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect

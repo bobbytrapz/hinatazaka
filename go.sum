@@ -11,6 +11,8 @@ github.com/bobbytrapz/chrome v0.0.0-20190327191630-b0464549e5cb h1:7ppeMCc1oRCEo
 github.com/bobbytrapz/chrome v0.0.0-20190327191630-b0464549e5cb/go.mod h1:SNEYU8/qeyiLXaJIe+2kl+rBfxme8noGUCsvAGUWn+Y=
 github.com/bobbytrapz/chrome v0.0.0-20190327232414-c08a4fb4e2f8 h1:p4g10TcUMnQMzMcXMAjTOdI3/0Nq1xULQT4I31UdxeI=
 github.com/bobbytrapz/chrome v0.0.0-20190327232414-c08a4fb4e2f8/go.mod h1:SNEYU8/qeyiLXaJIe+2kl+rBfxme8noGUCsvAGUWn+Y=
+github.com/bobbytrapz/chrome v0.0.0-20190328225127-89a96f8454e3 h1:JBsgODTG5JuEuFmWzRZugSavFVNB+v/CpUUqbSAupDY=
+github.com/bobbytrapz/chrome v0.0.0-20190328225127-89a96f8454e3/go.mod h1:SNEYU8/qeyiLXaJIe+2kl+rBfxme8noGUCsvAGUWn+Y=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/etcd v3.3.12+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/go-etcd v2.0.0+incompatible/go.mod h1:Jez6KQU2B/sWsbdaef3ED8NzMklzPG4d5KIOhIy30Tk=
