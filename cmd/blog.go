@@ -23,7 +23,6 @@ var saveBlogsOn string
 var saveTo string
 var maxSaved int
 var since time.Time
-var on time.Time
 
 func init() {
 	rootCmd.AddCommand(blogCmd)
@@ -47,29 +46,25 @@ var blogCmd = &cobra.Command{
 			}
 		}
 
+		if saveBlogsSince != "" && saveBlogsOn != "" {
+			return errors.New("You cannot use both 'on' and 'since'")
+		}
+
 		// use tokyo time
 		loc, err := time.LoadLocation("Asia/Tokyo")
 		if err != nil {
 			panic(err)
 		}
 
-		if saveBlogsOn != "" {
-			t, err := time.Parse("2006-01-02", saveBlogsOn)
-			if err != nil {
-				return err
-			}
-			y, m, d := t.In(loc).Date()
-			on = time.Date(y, m, d, 0, 0, 0, 0, loc)
-			return nil
-		}
-
 		y, m, d := time.Now().In(loc).Date()
 		today := time.Date(y, m, d, 0, 0, 0, 0, loc)
 
-		if saveBlogsSince == "" {
+		if saveBlogsSince == "" && saveBlogsOn == "" {
 			// default to today's blogs
 			since = today
 			return nil
+		} else if saveBlogsOn != "" {
+			saveBlogsSince = saveBlogsOn
 		}
 
 		switch saveBlogsSince {
@@ -158,11 +153,11 @@ var blogCmd = &cobra.Command{
 
 		// if --on is used --since is ignored
 		if saveBlogsOn != "" {
-			fmt.Printf("Saving blogs posted on %s\n", on.Format("2006-01-02"))
+			fmt.Printf("Saving blogs posted on %s\n", since.Format("2006-01-02"))
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				scrape.SaveBlogsOn(ctx, uniqueArgs, on, maxSaved)
+				scrape.SaveBlogsOn(ctx, uniqueArgs, since, maxSaved)
 			}()
 		} else {
 			// save blogs since
