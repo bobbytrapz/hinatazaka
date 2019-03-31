@@ -41,7 +41,7 @@ func MedianClosingBidValue(ctx context.Context, name string, keywords []string) 
 	p := params
 	va := params
 	link := fmt.Sprintf(endpoint, p, va, perPage)
-	fmt.Println("[link]", link)
+	// fmt.Println("[link]", link)
 
 	tab.PageNavigate(link)
 	// note: it takes a bit to load up since there are more items on a page
