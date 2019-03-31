@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/bobbytrapz/chrome"
 	"github.com/bobbytrapz/hinatazaka/members"
@@ -112,6 +113,15 @@ You can use 'photos' as the final keyword to append built-in keywords.
 				}
 			}(m)
 		}
+
+		// use tokyo time
+		loc, err := time.LoadLocation("Asia/Tokyo")
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Fprintf(os.Stderr, "collecting data for %d members...\n", len(uniqueArgs))
+		fmt.Printf("%s\n", time.Now().In(loc).Format(time.RFC1123Z))
 
 		defer func() {
 			sort.Sort(sort.Reverse(byValue(results)))
