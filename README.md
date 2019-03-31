@@ -42,6 +42,12 @@ Archive Iguchi's blog:
 hinatazaka blog iguchi --since forever
 ```
 
+Estimate photo values for「キュン」:
+
+```
+hinatazaka auction all -k キュン -k photos
+```
+
 Blog and images to \$HOME/hinatazaka by default. You can change this in the options ~/.config/hinatazaka/options.toml
 
 The blog is stored in an archive in mhtml format and all the images are saved in a directory according to the date the blog was posted. You can open mhtml files with Google Chrome.
