@@ -18,10 +18,12 @@ import (
 )
 
 var keywords []string
+var shouldAddPhotoKeywords bool
 
 func init() {
 	rootCmd.AddCommand(auctionCmd)
-	auctionCmd.Flags().StringArrayVarP(&keywords, "keywords", "k", []string{"生写真"}, "Search using these keywords")
+	auctionCmd.Flags().StringArrayVarP(&keywords, "keyword", "k", []string{"生写真"}, "Search using these keywords")
+	auctionCmd.Flags().BoolVarP(&shouldAddPhotoKeywords, "photos", "p", false, "Add keywords related to photos")
 }
 
 type res struct {
@@ -90,12 +92,9 @@ You can use 'photos' as the final keyword to append built-in keywords.
 			uniqueArgs[addArg] = true
 		}
 
-		for ndx, kw := range keywords {
-			if kw == "photos" {
-				keywords = append(keywords[:ndx],
-					"日向坂", "生写真", "封入", "コンプ", "-セミ", "-60")
-				break
-			}
+		if shouldAddPhotoKeywords {
+			keywords = append(keywords,
+				"日向坂", "生写真", "封入", "コンプ", "-セミ", "-60")
 		}
 
 		var wg sync.WaitGroup

@@ -45,7 +45,7 @@ hinatazaka blog iguchi --since forever
 Estimate photo values for「キュン」:
 
 ```
-hinatazaka auction all -k キュン -k photos
+hinatazaka auction all -k キュン -p
 ```
 
 Blog and images to \$HOME/hinatazaka by default. You can change this in the options ~/.config/hinatazaka/options.toml
