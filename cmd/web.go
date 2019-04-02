@@ -179,7 +179,10 @@ var webCmd = &cobra.Command{
 				wg.Add(1)
 				go func(l string) {
 					defer wg.Done()
-					jsCode := `[...document.querySelector('.blog-article__content').querySelectorAll('.img__item > img')].map(el => el.src).toString()`
+					jsCode := `[...document.querySelector('.blog-article__content').querySelectorAll('.img__item > img')].map(el => {
+							link = el.src;
+							return link.includes('?') ? link.slice(0, link.indexOf('?')) : link;
+						}).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
 					scrape.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
 				}(link)
