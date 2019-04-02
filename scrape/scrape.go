@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -14,6 +15,10 @@ import (
 	"github.com/bobbytrapz/chrome"
 	"github.com/bobbytrapz/hinatazaka/options"
 )
+
+var httpClient = http.Client{
+	Timeout: 60 * time.Second,
+}
 
 // NumTabWorkersPerMember decides how many tabs to open for each blog spider
 var NumTabWorkersPerMember = 8
@@ -87,7 +92,14 @@ func SaveImagesFromTabWith(ctx context.Context, tab chrome.Tab, link string, sav
 		}
 		fn := filepath.Join(saveTo, filepath.Base(purl.Path))
 
-		res, err := chrome.Fetch(ctx, u)
+		req, err := http.NewRequest("GET", u, nil)
+		if err != nil {
+			err = fmt.Errorf("scrape.SaveImagesFromTabWith: %s", err)
+			return
+		}
+		req = req.WithContext(ctx)
+
+		res, err := httpClient.Do(req)
 		if err != nil {
 			chrome.Log("scrape.SaveImagesFromTabWith: %s", err)
 			fmt.Println("[nok]", err)
