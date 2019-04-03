@@ -121,7 +121,7 @@ You can use 'photos' as the final keyword to append built-in keywords.
 		}
 
 		fmt.Fprintf(os.Stderr, "collecting data for %d members...\n", len(uniqueArgs))
-		fmt.Printf("%s\n", time.Now().In(loc).Format(time.RFC1123Z))
+		fmt.Printf("\n%s\n", time.Now().In(loc).Format(time.RFC1123Z))
 
 		defer func() {
 			sort.Sort(sort.Reverse(byValue(results)))
