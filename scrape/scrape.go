@@ -79,6 +79,7 @@ func SaveImagesFromTabWith(ctx context.Context, tab chrome.Tab, link string, sav
 	}
 	chrome.Log("scrape.SaveImagesFromTabWith: res: %+v", res)
 
+	count := 0
 	for _, u := range strings.Split(res.Result.Value, ",") {
 		if u == "" {
 			continue
@@ -119,8 +120,11 @@ func SaveImagesFromTabWith(ctx context.Context, tab chrome.Tab, link string, sav
 			chrome.Log("scrape.SaveImagesFromTabWith: %s", err)
 			fmt.Println("[nok]", err)
 		}
+		count++
 
 		f.Close()
 		res.Body.Close()
 	}
+
+	fmt.Printf("[saved] %d images\n", count)
 }
