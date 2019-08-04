@@ -111,7 +111,12 @@ var webCmd = &cobra.Command{
 				wg.Add(1)
 				go func(l string) {
 					defer wg.Done()
-					jsCode := `[document.querySelector('main').querySelector(".entry-thumbnail > img"), ...document.querySelectorAll('.gallery-icon > a')].map(el => el.src || el.href).toString()`
+					var jsCode string
+					if strings.Contains(link, "archives") {
+						jsCode = `[...document.querySelector('main').querySelectorAll("img.attachment-thumbnail")].map(el => el.src || el.href).toString()`
+					} else {
+						jsCode = `[document.querySelector('main').querySelector(".entry-thumbnail > img"), ...document.querySelectorAll('.gallery-icon > a')].map(el => el.src || el.href).toString()`
+					}
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
 					scrape.SaveImagesFrom(ctx, link, saveWebImagesTo, jsCode)
 				}(link)
