@@ -103,7 +103,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					if !strings.Contains(l, "photo") {
 						// todo: maybe add support for news page
-						fmt.Printf("We need https://mdpr.jp/photo/detail/{num}")
+						fmt.Println("We need https://mdpr.jp/photo/detail/{num}")
 						return
 					}
 					jsCode := `[...document.querySelectorAll('figure.square > a > img')].map(el => {
@@ -131,7 +131,7 @@ var webCmd = &cobra.Command{
 				go func(l string) {
 					defer wg.Done()
 					if !strings.Contains(l, "photo") {
-						fmt.Printf("We need https://taishu.jp/photo/{num}")
+						fmt.Println("We need https://taishu.jp/photo/{num}")
 						return
 					}
 					jsCode := `[...document.querySelectorAll('.swiper-slide > figure > img')].map(el => el.src).toString()`
