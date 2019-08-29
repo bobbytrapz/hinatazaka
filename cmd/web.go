@@ -119,7 +119,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					var jsCode string
 					if strings.Contains(l, "archives") {
-						jsCode = `[...document.querySelector('main').querySelectorAll("img.attachment-thumbnail")].map(el => el.src || el.href).toString()`
+						jsCode = `[...document.querySelector('main').querySelectorAll(".gallery-icon > a")].map(el => el.href).toString()`
 					} else {
 						jsCode = `[document.querySelector('main').querySelector(".entry-thumbnail > img"), ...document.querySelectorAll('.gallery-icon > a')].map(el => el.src || el.href).toString()`
 					}
