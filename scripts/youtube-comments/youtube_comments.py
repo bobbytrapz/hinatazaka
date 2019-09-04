@@ -6,7 +6,6 @@ from wordcloud import WordCloud
 from pathlib import Path
 import csv
 import json
-import nagisa
 import googleapiclient.discovery
 
 CREDENTIALS_PATH = 'creds.json'
@@ -149,6 +148,7 @@ def word_counts(comments) -> list:
     """
         count words in all parsed commments
     """
+    import nagisa
     with open(STOP_WORDS_PATH) as f:
         stopwords = json.load(f)
     words = Counter()
@@ -202,7 +202,11 @@ def main(url, save_to, max_pages):
 
 if __name__ == '__main__':
     import sys
+    if len(sys.argv) != 2 and len(sys.argv) != 3:
+        print("usage: {} [video_url]".format(sys.argv[0]))
+        sys.exit(0)
     url = sys.argv[1]
+    max_pages = int(sys.argv[2]) if len(sys.argv) == 3 else inf
     video_id = video_id_from_url(url)
     save_to = Path('data') / video_id
-    main(url, save_to, max_pages=100)
+    main(url, save_to, max_pages=max_pages)
