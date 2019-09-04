@@ -42,12 +42,6 @@ Archive Iguchi's blog:
 hinatazaka blog iguchi --since forever
 ```
 
-Estimate photo values for「キュン」:
-
-```
-hinatazaka auction all -k キュン -p
-```
-
 Blog and images to \$HOME/hinatazaka by default. You can change this in the options ~/.config/hinatazaka/options.toml
 
 The blog is stored in an archive in mhtml format and all the images are saved in a directory according to the date the blog was posted. You can open mhtml files with Google Chrome.
@@ -56,7 +50,14 @@ Items supported so far:
 
 - blog: archives the blog and saves image
 - web: scrape images from any one of the supported websites
-- auction: estimates Yahoo auction value based on custom keywords
+
+## scripts
+
+Some [python scripts](./scripts) for data collection are also included
+
+```
+youtube-comments.py {video_url}
+```
 
 ## Other Groups
 
