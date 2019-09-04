@@ -22,7 +22,8 @@ var keywords []string
 var shouldAddPhotoKeywords bool
 
 func init() {
-	rootCmd.AddCommand(auctionCmd)
+	// disabled
+	// rootCmd.AddCommand(auctionCmd)
 	auctionCmd.Flags().StringArrayVarP(&keywords, "keyword", "k", []string{"生写真"}, "Search using these keywords")
 	auctionCmd.Flags().BoolVarP(&shouldAddPhotoKeywords, "photos", "p", false, "Add keywords related to photos")
 }
