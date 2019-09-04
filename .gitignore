@@ -9,6 +9,7 @@ dist/
 *.so
 *.dylib
 *.bin
+*.pyc
 
 # Test binary, built with `go test -c`
 *.test
