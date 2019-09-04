@@ -203,7 +203,7 @@ def main(url, save_to, max_pages):
 if __name__ == '__main__':
     import sys
     if len(sys.argv) != 2 and len(sys.argv) != 3:
-        print("usage: {} [video_url]".format(sys.argv[0]))
+        print("usage: {} [video_url] [max_pages=inf]".format(sys.argv[0]))
         sys.exit(0)
     url = sys.argv[1]
     max_pages = int(sys.argv[2]) if len(sys.argv) == 3 else inf
