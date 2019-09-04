@@ -51,13 +51,17 @@ Items supported so far:
 - blog: archives the blog and saves image
 - web: scrape images from any one of the supported websites
 
-## scripts
+## Scripts
 
 Some [python scripts](./scripts) for data collection are also included
 
 ```
 youtube-comments.py {video_url}
 ```
+
+## Showroom
+
+If you want to download Showroom streams checkout my other project: [autosr](https://github.com/bobbytrapz/autosr)
 
 ## Other Groups
 
