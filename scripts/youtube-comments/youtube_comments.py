@@ -116,8 +116,8 @@ def save_comments(raw_comments, parsed_comments, save_as='comments.tsv'):
         save raw_comments to json lines file
         save parsed_comments to a tsv file
     """
-    jsonl_fn = Path(save_as).with_suffix('.jsonl')
-    csv_fn = Path(save_as).with_suffix('.tsv')
+    jsonl_path = Path(save_as).with_suffix('.jsonl')
+    csv_path = Path(save_as).with_suffix('.tsv')
     csv_fields = [
         'id',
         'author',
@@ -128,11 +128,11 @@ def save_comments(raw_comments, parsed_comments, save_as='comments.tsv'):
         'updated_at',
         'num_replies',
     ]
-    with open(jsonl_fn, 'w') as jsonlf, open(csv_fn, 'w') as csvf:
-        print("[save_comments] saving to '{}'".format(jsonl_fn))
+    with open(jsonl_path, 'w') as jsonlf, open(csv_path, 'w') as csvf:
+        print("[save_comments] saving to '{}'".format(jsonl_path))
         for c in raw_comments:
             jsonlf.write('{}\n'.format(json.dumps(c)))
-        print("[save_comments] saving to '{}'".format(csv_fn))
+        print("[save_comments] saving to '{}'".format(csv_path))
         csv_writer = csv.DictWriter(csvf, csv_fields,
                                     delimiter='\t', extrasaction='ignore')
         csv_writer.writeheader()
@@ -188,16 +188,16 @@ def main(url, save_to, max_pages):
     parsed_comments = parse_comments_and_replies(raw_comments)
 
     # save data
-    comments_fn = Path(save_to) / 'comments-{}.tsv'.format(timestamp)
-    words_fn = Path(save_to) / 'words-{}.txt'.format(timestamp)
-    wordcloud_fn = Path(save_to) / 'word-cloud-{}.png'.format(timestamp)
+    comments_path = Path(save_to) / 'comments-{}.tsv'.format(timestamp)
+    words_path = Path(save_to) / 'words-{}.txt'.format(timestamp)
+    wordcloud_path = Path(save_to) / 'word-cloud-{}.png'.format(timestamp)
     words = word_counts(parsed_comments)
-    print("saving to '{}'".format(words_fn))
-    with open(words_fn, 'w') as f:
+    print("saving to '{}'".format(words_path))
+    with open(words_path, 'w') as f:
         for w, c in words.most_common():
             f.write("{} {}\n".format(w, c))
-    create_word_cloud(words, save_as=wordcloud_fn)
-    save_comments(raw_comments, parsed_comments, save_as=comments_fn)
+    create_word_cloud(words, save_as=wordcloud_path)
+    save_comments(raw_comments, parsed_comments, save_as=comments_path)
 
 
 if __name__ == '__main__':
