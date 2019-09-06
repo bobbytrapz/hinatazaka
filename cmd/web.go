@@ -226,6 +226,17 @@ var webCmd = &cobra.Command{
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
 					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
 				}(u.String())
+			case "www.nikkansports.com":
+				wg.Add(1)
+				go func(l string) {
+					defer wg.Done()
+					jsCode := `[...document.querySelectorAll('.article-main img[style]')]
+						.map(el => el.style.backgroundImage.slice(5, -2))
+						.map(url => url.replace('w200', 'w500'))
+						.toString()`
+					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
+					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+				}(u.String())
 			default:
 				fmt.Println("We cannot handle:", u.String())
 			}
