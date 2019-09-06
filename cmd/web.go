@@ -232,7 +232,8 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelectorAll('.article-main img[style]')]
 						.map(el => el.style.backgroundImage.slice(5, -2))
-						.map(url => url.replace('w200', 'w500'))
+						.map(url => url.replace('w200', 'w1300'))
+						.map(url => url.replace('w500', 'w1300'))
 						.toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
 					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
