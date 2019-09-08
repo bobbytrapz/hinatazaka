@@ -35,6 +35,12 @@ var webCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		// create save directory if it does not exist
+		err := os.MkdirAll(saveWebImagesTo, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+
 		// parse given links
 		var urls []*url.URL
 		for _, link := range args {
