@@ -227,7 +227,7 @@ var webCmd = &cobra.Command{
 				go func(l string) {
 					defer wg.Done()
 					jsCode := `[...document.querySelector('.posts__contents').querySelectorAll('img')]
-						.filter(i => i.width > 300)
+						.filter(i => i.width >= 300)
 						.map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
 					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
