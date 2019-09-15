@@ -55,11 +55,11 @@ def video_id_from_url(video_url: str) -> str:
     """
     url = urlparse(video_url)
     if url.scheme != "https" or url.netloc != 'www.youtube.com':
-        raise Exception("invalid url: {}".format(video_url))
+        raise RuntimeError("invalid url: {}".format(video_url))
 
     params = parse_qs(url.query)
     if 'v' not in params:
-        raise Exception("missing video id in url: {}".format(video_url))
+        raise RuntimeError("missing video id in url: {}".format(video_url))
 
     video_id = params.get('v')[0]
 
