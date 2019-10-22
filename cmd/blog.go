@@ -8,6 +8,7 @@ import (
 	"math"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -23,6 +24,7 @@ var saveBlogsOn string
 var saveTo string
 var maxSaved int
 var since time.Time
+var shouldPrintPath bool
 
 func init() {
 	rootCmd.AddCommand(blogCmd)
@@ -30,6 +32,7 @@ func init() {
 	blogCmd.Flags().StringVar(&saveBlogsOn, "on", "", "Save any blogs posted on this date ex: 2019-03-27")
 	blogCmd.Flags().IntVar(&maxSaved, "count", math.MaxInt32, "The max number of blogs to save.")
 	blogCmd.Flags().StringVar(&saveTo, "saveto", "", "Directory path to save blog data to")
+	blogCmd.Flags().BoolVar(&shouldPrintPath, "path", false, "Print the path where we will save blog data")
 }
 
 var blogCmd = &cobra.Command{
@@ -40,14 +43,20 @@ var blogCmd = &cobra.Command{
 			return errors.New("We need at least one name/nickname of a hinatazaka member")
 		}
 
-		if saveTo != "" {
-			if stat, err := os.Stat(saveTo); os.IsNotExist(err) || !stat.IsDir() {
-				return errors.New("Save path must be a directory")
-			}
+		if saveTo == "" {
+			saveTo = options.Get("save_to")
+		}
+
+		if stat, err := os.Stat(saveTo); os.IsNotExist(err) || !stat.IsDir() {
+			return errors.New("Save path must be a directory")
 		}
 
 		if saveBlogsSince != "" && saveBlogsOn != "" {
 			return errors.New("You cannot use both 'on' and 'since'")
+		}
+
+		if shouldPrintPath && saveBlogsSince != "" {
+			return errors.New("You cannot use both 'path' and 'since'")
 		}
 
 		// use tokyo time
@@ -59,42 +68,34 @@ var blogCmd = &cobra.Command{
 		y, m, d := time.Now().In(loc).Date()
 		today := time.Date(y, m, d, 0, 0, 0, 0, loc)
 
-		if saveBlogsSince == "" && saveBlogsOn == "" {
-			// default to today's blogs
-			since = today
-			return nil
-		} else if saveBlogsOn != "" {
+		if saveBlogsOn != "" {
 			saveBlogsSince = saveBlogsOn
 		}
 
 		switch saveBlogsSince {
-		case "forever":
-			// save all blogs since forever
-			since = time.Time{}
-			return nil
+		case "":
+			fallthrough
 		case "today":
 			// same as default
 			since = today
-			return nil
+		case "forever":
+			// save all blogs since forever
+			since = time.Time{}
 		case "yesterday":
 			since = today.AddDate(0, 0, -1)
-			return nil
 		case "week":
 			// within this week
 			weekday := today.Weekday()
 			since = today.AddDate(0, 0, -int(weekday))
-			return nil
 		case "month":
 			// within this month
 			day := today.Day()
 			since = today.AddDate(0, 0, -int(day)+1)
-			return nil
 		case "year":
 			// within this year
 			month := today.Month()
 			day := today.Day()
 			since = today.AddDate(0, -int(month)+1, -int(day)+1)
-			return nil
 		default:
 			t, err := time.Parse("2006-01-02", saveBlogsSince)
 			if err != nil {
@@ -102,10 +103,28 @@ var blogCmd = &cobra.Command{
 			}
 			y, m, d := t.In(loc).Date()
 			since = time.Date(y, m, d, 0, 0, 0, 0, loc)
-			return nil
 		}
+
+		if shouldPrintPath {
+			if len(args) > 1 {
+				return errors.New("We can only print one member save path at a time")
+			}
+			if members.RealName(args[0]) == "" {
+				return errors.New("You must provide a valid member name")
+			}
+		}
+
+		return
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		if shouldPrintPath {
+			name := members.RealName(args[0])
+			at := since.Format("2006-01-02")
+			path := filepath.Join(options.Get("save_to"), name, at)
+			fmt.Printf("%s", path)
+			return
+		}
+
 		// unique args
 		uniqueArgs := map[string]bool{}
 		for _, a := range args {
