@@ -246,12 +246,14 @@ func SaveAllBlogsSince(ctx context.Context, root string, since time.Time, maxSav
 						close(done)
 						return
 					}
+					// if there is space between this member's names remove it
+					author := strings.ReplaceAll(b.Name, " ", "")
 					// send each single blog we find for processing by a tab worker
 					jobs <- chrome.TabJob{
 						Link: b.Link,
 						Data: map[string]interface{}{
 							"Title": b.Title,
-							"Name":  b.Name,
+							"Name":  author,
 							"At":    at,
 						},
 					}
@@ -319,6 +321,7 @@ func SaveBlogsOn(ctx context.Context, names map[string]bool, on time.Time, maxSa
 				return
 			}
 
+			// if there is space between this member's names remove it
 			author := strings.ReplaceAll(b.Name, " ", "")
 			if _, ok := names[author]; !ok {
 				continue
@@ -329,7 +332,7 @@ func SaveBlogsOn(ctx context.Context, names map[string]bool, on time.Time, maxSa
 				Link: b.Link,
 				Data: map[string]interface{}{
 					"Title": b.Title,
-					"Name":  b.Name,
+					"Name":  author,
 					"At":    at,
 				},
 			}
