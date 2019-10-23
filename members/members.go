@@ -55,6 +55,7 @@ var nicknames = map[string]string{
 	"kato":    "加藤史帆",
 	"shiho":   "加藤史帆",
 	"katoshi": "加藤史帆",
+	"toshi":   "加藤史帆",
 
 	"きょんこ":        "齊藤京子",
 	"キョンこ":        "齊藤京子",
