@@ -16,6 +16,9 @@ import (
 	"github.com/bobbytrapz/chrome"
 )
 
+// ShouldDryRun is the context key indicating a dry run
+type ShouldDryRun struct{}
+
 // uses Array toString() to make a comma-separated list of image urls
 var jsBlogImages = `[...document.querySelectorAll(':scope .p-blog-article img:not(.emoji)')].map(el => el.src).toString()`
 
@@ -165,7 +168,12 @@ func newSaveBlogTabWorkerFn(ctx context.Context) chrome.TabWorkerFn {
 
 		fmt.Println("[save]", job.Link)
 		fmt.Println("[title]", job.GetString("Title"))
-		SaveBlogFromTab(ctx, tab, job.Link, saveBlogAs, saveImagesTo)
+
+		if v := ctx.Value(ShouldDryRun{}); v != nil {
+			fmt.Printf("[dry-run] %s\n", saveBlogAs)
+		} else {
+			SaveBlogFromTab(ctx, tab, job.Link, saveBlogAs, saveImagesTo)
+		}
 
 		return nil
 	}

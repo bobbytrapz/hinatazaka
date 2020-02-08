@@ -25,6 +25,7 @@ var saveTo string
 var maxSaved int
 var since time.Time
 var shouldPrintPath bool
+var shouldDryRun bool
 
 func init() {
 	rootCmd.AddCommand(blogCmd)
@@ -33,6 +34,7 @@ func init() {
 	blogCmd.Flags().IntVar(&maxSaved, "count", math.MaxInt32, "The max number of blogs to save.")
 	blogCmd.Flags().StringVar(&saveTo, "saveto", "", "Directory path to save blog data to")
 	blogCmd.Flags().BoolVar(&shouldPrintPath, "path", false, "Print the path where we will save blog data")
+	blogCmd.Flags().BoolVar(&shouldDryRun, "dry-run", false, "Show where we would save a blog but do not save it")
 }
 
 var blogCmd = &cobra.Command{
@@ -145,6 +147,10 @@ var blogCmd = &cobra.Command{
 		ctx := context.Background()
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
+
+		if shouldDryRun {
+			ctx = context.WithValue(ctx, scrape.ShouldDryRun{}, struct{}{})
+		}
 
 		if verbose {
 			chrome.Log = log.Printf
