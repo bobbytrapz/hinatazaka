@@ -137,7 +137,7 @@ var webCmd = &cobra.Command{
 				go func(l string) {
 					defer wg.Done()
 					if !strings.Contains(l, "photo") {
-						fmt.Println("We need https://taishu.jp/photo/{num}")
+						fmt.Println("We need https://taishu.jp/articles/photo/{num}")
 						return
 					}
 					jsCode := `[...document.querySelectorAll('.swiper-slide > figure > img')].map(el => el.src).toString()`
