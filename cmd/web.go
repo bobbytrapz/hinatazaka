@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"path"
 	"strings"
 	"sync"
 
@@ -257,6 +258,18 @@ var webCmd = &cobra.Command{
 				go func(l string) {
 					defer wg.Done()
 					jsCode := `[...document.querySelector('.gw-content__entry-article').querySelectorAll('img')].map(el => el.src).toString()`
+					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
+					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+				}(u.String())
+			case "thetv.jp":
+				wg.Add(1)
+				go func(l string) {
+					defer wg.Done()
+					base := path.Base(u.Path)
+					jsCode := fmt.Sprintf(`[...document.querySelector('.galleryArea').querySelectorAll('a')]
+							.map(el => new URL(el.href).pathname.split('/').slice(-2)[0])
+							.map(name => 'https://thetv.jp/i/nw/%s/' + name + '.jpg')
+							.toString()`, base)
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
 					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
 				}(u.String())
