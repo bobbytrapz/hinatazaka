@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"time"
 
@@ -100,11 +101,22 @@ var blogCmd = &cobra.Command{
 			since = today.AddDate(0, -int(month)+1, -int(day)+1)
 		default:
 			t, err := time.Parse("2006-01-02", saveBlogsSince)
-			if err != nil {
-				return err
+			if err == nil {
+				// parsed a date
+				y, m, d := t.In(loc).Date()
+				since = time.Date(y, m, d, 0, 0, 0, 0, loc)
+			} else {
+				// not a date; check for a number of days ago
+				numDays, e := strconv.ParseInt(saveBlogsSince, 10, 64)
+				if e != nil {
+					return err
+				}
+				if numDays < 0 {
+					return errors.New("Number of days must be positive")
+				}
+				y, m, d := today.AddDate(0, 0, int(-numDays)).Date()
+				since = time.Date(y, m, d, 0, 0, 0, 0, loc)
 			}
-			y, m, d := t.In(loc).Date()
-			since = time.Date(y, m, d, 0, 0, 0, 0, loc)
 		}
 
 		if shouldPrintPath {
