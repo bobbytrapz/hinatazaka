@@ -8,27 +8,28 @@ import (
 // todo: update
 // they have not moved to hinatazaka46.com yet
 var Blogs = map[string]string{
-	"井口眞緒":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=1",
-	"潮紗理菜":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=2",
-	"柿崎芽実":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=3",
-	"影山優佳":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=4",
-	"加藤史帆":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=5",
-	"齊藤京子":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=6",
-	"佐々木久美": "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=7",
-	"佐々木美玲": "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=8",
-	"高瀬愛奈":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=9",
-	"高本彩花":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=10",
-	"東村芽依":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=11",
-	"金村美玖":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=12",
-	"河田陽菜":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=13",
-	"小坂菜緒":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=14",
-	"富田鈴花":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=15",
-	"丹生明里":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=16",
-	"濱岸ひより": "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=17",
-	"松田好花":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=18",
-	"宮田愛萌":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=19",
-	"渡邉美穂":  "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=20",
-	"上村ひなの": "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=21",
+	"井口眞緒":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=1",
+	"潮紗理菜":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=2",
+	"柿崎芽実":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=3",
+	"影山優佳":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=4",
+	"加藤史帆":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=5",
+	"齊藤京子":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=6",
+	"佐々木久美":     "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=7",
+	"佐々木美玲":     "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=8",
+	"高瀬愛奈":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=9",
+	"高本彩花":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=10",
+	"東村芽依":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=11",
+	"金村美玖":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=12",
+	"河田陽菜":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=13",
+	"小坂菜緒":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=14",
+	"富田鈴花":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=15",
+	"丹生明里":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=16",
+	"濱岸ひより":     "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=17",
+	"松田好花":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=18",
+	"宮田愛萌":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=19",
+	"渡邉美穂":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=20",
+	"上村ひなの":     "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=21",
+	"日向坂46新三期生": "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=1000",
 }
 
 // nicknames of members
@@ -124,6 +125,8 @@ var nicknames = map[string]string{
 	"hinanonano": "上村ひなの",
 	"nano":       "上村ひなの",
 	"ひなの":        "上村ひなの",
+
+	"new3rdgen": "日向坂46新三期生",
 }
 
 // RealName provides the real name of a member
