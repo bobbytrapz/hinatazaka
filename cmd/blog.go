@@ -195,7 +195,10 @@ var blogCmd = &cobra.Command{
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				scrape.SaveBlogsOn(ctx, uniqueArgs, since, maxSaved)
+				err := scrape.SaveBlogsOn(ctx, uniqueArgs, since, maxSaved)
+				if err != nil {
+					fmt.Printf("Error: %v", err)
+				}
 			}()
 		} else {
 			// save blogs since
@@ -209,7 +212,10 @@ var blogCmd = &cobra.Command{
 						return
 					}
 					fmt.Printf("Saving %s blogs since %s\n", m, since.Format("2006-01-02"))
-					scrape.SaveAllBlogsSince(ctx, link, since, maxSaved)
+					err := scrape.SaveAllBlogsSince(ctx, link, since, maxSaved)
+					if err != nil {
+						fmt.Printf("Error: %v", err)
+					}
 				}(member)
 			}
 		}
