@@ -51,7 +51,8 @@ var blogCmd = &cobra.Command{
 		}
 
 		if stat, err := os.Stat(saveTo); os.IsNotExist(err) || !stat.IsDir() {
-			return errors.New("Save path must be a directory")
+			abs, _ := filepath.Abs(saveTo)
+			return errors.New("Save path must be a directory: " + abs)
 		}
 
 		if saveBlogsSince != "" && saveBlogsOn != "" {
