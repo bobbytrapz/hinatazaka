@@ -29,7 +29,9 @@ var Blogs = map[string]string{
 	"宮田愛萌":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=19",
 	"渡邉美穂":      "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=20",
 	"上村ひなの":     "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=21",
-	"日向坂46新三期生": "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=1000",
+	"髙橋未来虹":     "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=22",
+	"森本茉莉":     "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=23",
+	"山口陽世":     "https://www.hinatazaka46.com/s/official/diary/member/list?ima=0000&ct=24",
 }
 
 // nicknames of members
@@ -126,7 +128,16 @@ var nicknames = map[string]string{
 	"nano":       "上村ひなの",
 	"ひなの":        "上村ひなの",
 
-	"new3rdgen": "日向坂46新三期生",
+	"takahashi": "髙橋未来虹",
+	"mikuni": "髙橋未来虹",
+
+	"morimoto": "森本茉莉",
+	"marii": "森本茉莉",
+
+	"yamaguchi": "山口陽世",
+	"haruyo": "山口陽世",
+	"paru": "山口陽世",
+	"paruyo": "山口陽世",
 }
 
 // RealName provides the real name of a member
