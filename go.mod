@@ -1,20 +1,22 @@
 module github.com/bobbytrapz/hinatazaka
 
 require (
-	github.com/bobbytrapz/chrome v0.0.0-20190404163747-33299e2ba682
-	github.com/coreos/etcd v3.3.12+incompatible // indirect
-	github.com/gorilla/websocket v1.4.0
+	github.com/bobbytrapz/chrome v0.0.0-20200414105837-688ad14f8fdc
+	github.com/bobbytrapz/gochrome v0.0.0-20210105235050-38aa04f6c8ff
+	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/pelletier/go-toml v1.3.0 // indirect
-	github.com/spf13/afero v1.2.2 // indirect
-	github.com/spf13/cobra v0.0.3
+	github.com/magiconair/properties v1.8.4 // indirect
+	github.com/mitchellh/mapstructure v1.4.0 // indirect
+	github.com/pelletier/go-toml v1.8.1 // indirect
+	github.com/spf13/afero v1.5.1 // indirect
+	github.com/spf13/cast v1.3.1 // indirect
+	github.com/spf13/cobra v1.1.1
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/viper v1.3.2
-	github.com/stretchr/objx v0.1.1 // indirect
-	github.com/stretchr/testify v1.3.0 // indirect
-	github.com/ugorji/go/codec v0.0.0-20190320090025-2dc34c0b8780 // indirect
-	golang.org/x/crypto v0.0.0-20190403202508-8e1b8d32e692 // indirect
-	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
+	github.com/spf13/viper v1.7.1
+	golang.org/x/sys v0.0.0-20210105210732-16f7687f5001 // indirect
+	golang.org/x/text v0.3.4 // indirect
+	gopkg.in/ini.v1 v1.62.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
 go 1.13
