@@ -13,10 +13,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bobbytrapz/chrome"
+	"github.com/bobbytrapz/gochrome"
+	"github.com/bobbytrapz/hinatazaka/blog"
 	"github.com/bobbytrapz/hinatazaka/members"
 	"github.com/bobbytrapz/hinatazaka/options"
-	"github.com/bobbytrapz/hinatazaka/scrape"
 	"github.com/spf13/cobra"
 )
 
@@ -162,30 +162,21 @@ var blogCmd = &cobra.Command{
 		defer cancel()
 
 		if shouldDryRun {
-			ctx = context.WithValue(ctx, scrape.ShouldDryRun{}, struct{}{})
+			ctx = context.WithValue(ctx, blog.ShouldDryRun{}, struct{}{})
 		}
 
 		if verbose {
-			chrome.Log = log.Printf
+			gochrome.Log = log.Printf
 		}
 
-		chrome.UserAgent = options.Get("user_agent")
+		browser := gochrome.NewBrowser()
+		browser.UserAgent = options.Get("user_agent")
 
-		// start chrome
-		if err := chrome.Start(ctx, userProfileDir, port); err != nil {
+		_, err := browser.Start(ctx, gochrome.TemporaryUserProfileDirectory, port)
+		if err != nil {
 			panic(err)
 		}
-
-		// chrome.DumpProtocol()
-
-		// wait for chrome to close
-		defer func() {
-			chrome.Wait()
-		}()
-
-		if saveTo != "" {
-			scrape.SaveTo = saveTo
-		}
+		defer browser.Wait()
 
 		var wg sync.WaitGroup
 
@@ -195,7 +186,7 @@ var blogCmd = &cobra.Command{
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				err := scrape.SaveBlogsOn(ctx, uniqueArgs, since, maxSaved)
+				err := blog.SaveBlogsOn(ctx, browser, uniqueArgs, since, saveTo, maxSaved)
 				if err != nil {
 					fmt.Printf("Error: %v", err)
 				}
@@ -212,7 +203,7 @@ var blogCmd = &cobra.Command{
 						return
 					}
 					fmt.Printf("Saving %s blogs since %s\n", m, since.Format("2006-01-02"))
-					err := scrape.SaveAllBlogsSince(ctx, link, since, maxSaved)
+					err := blog.SaveBlogsSince(ctx, browser, link, since, saveTo, maxSaved)
 					if err != nil {
 						fmt.Printf("Error: %v", err)
 					}
