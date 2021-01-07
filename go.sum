@@ -33,6 +33,8 @@ github.com/bobbytrapz/gochrome v0.0.0-20210105223010-50aa43eba6a6 h1:8C0RJE6NHY8
 github.com/bobbytrapz/gochrome v0.0.0-20210105223010-50aa43eba6a6/go.mod h1:IRdV/J+IeJom37dyl9/Y5EI+aXUdctfk0VQaTqgof2s=
 github.com/bobbytrapz/gochrome v0.0.0-20210105235050-38aa04f6c8ff h1:H6KnZDEbT6G3UPxP7D1Kcen2l4/GiNNF9qiYu53SBGs=
 github.com/bobbytrapz/gochrome v0.0.0-20210105235050-38aa04f6c8ff/go.mod h1:IRdV/J+IeJom37dyl9/Y5EI+aXUdctfk0VQaTqgof2s=
+github.com/bobbytrapz/gochrome v0.0.0-20210106110149-57a29d848ea8 h1:6jcXWVHUzGliCgBlknpgqa3tgN/dDtpWCBkgOUqgQEw=
+github.com/bobbytrapz/gochrome v0.0.0-20210106110149-57a29d848ea8/go.mod h1:IRdV/J+IeJom37dyl9/Y5EI+aXUdctfk0VQaTqgof2s=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=

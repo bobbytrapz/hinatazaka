@@ -2,7 +2,7 @@ module github.com/bobbytrapz/hinatazaka
 
 require (
 	github.com/bobbytrapz/chrome v0.0.0-20200414105837-688ad14f8fdc
-	github.com/bobbytrapz/gochrome v0.0.0-20210105235050-38aa04f6c8ff
+	github.com/bobbytrapz/gochrome v0.0.0-20210106110149-57a29d848ea8
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.4 // indirect
