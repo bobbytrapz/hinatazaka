@@ -219,15 +219,18 @@ func SaveBlogsSince(ctx context.Context, browser *gochrome.Browser, root string,
 	}
 
 	// spider
-	spiderTabPool, err := browser.NewTabPool(ctx, 4)
+	spiderBlogList, err := browser.NewTab(ctx)
 	if err != nil {
 		return fmt.Errorf("blog.SaveBlogsSince: %s", err)
 	}
+	defer spiderBlogList.Close()
+
 	tabPool, err := browser.NewTabPool(ctx, 8)
 	if err != nil {
 		return fmt.Errorf("blog.SaveBlogsSince: %s", err)
 	}
 	defer tabPool.Close()
+
 	timeout := time.NewTimer(WaitForSpiderTimeout)
 
 	count := 0
@@ -259,19 +262,16 @@ func SaveBlogsSince(ctx context.Context, browser *gochrome.Browser, root string,
 					timeout.Reset(WaitForSpiderTimeout)
 				}
 
-				listBlogTab := spiderTabPool.Grab()
-
 				// get list of blogs
-				_, err = listBlogTab.Goto(link)
+				_, err = spiderBlogList.Goto(link)
 				if err != nil {
 					panic(err)
 				}
-				listBlogTab.WaitForNetworkIdle(WaitForBlogList)
-				blogsFromPage, err := blogsFromTab(listBlogTab)
+				spiderBlogList.WaitForNetworkIdle(WaitForBlogList)
+				blogsFromPage, err := blogsFromTab(spiderBlogList)
 				if err != nil {
 					return
 				}
-				spiderTabPool.Release(listBlogTab)
 
 				// read pages
 				for _, page := range blogsFromPage.Pages {
@@ -320,10 +320,9 @@ func SaveBlogsSince(ctx context.Context, browser *gochrome.Browser, root string,
 	visit <- root
 
 	// give spider some time to start
-	<-time.After(3 * time.Second)
+	<-time.After(WaitForBlogList + WaitForBlogDownload)
 
 	// wait for jobs to finish
-	spiderTabPool.Wait()
 	tabPool.Wait()
 
 	fmt.Println("[saved]", count, "blogs")
