@@ -289,7 +289,7 @@ func SaveBlogsSince(ctx context.Context, browser *gochrome.Browser, root string,
 
 					// the blogs are found in reverse chronological order so
 					// I think this should work
-					at := time.Date(b.Year, b.Month, b.Day, 0, 0, 0, 0, loc)
+					at := time.Date(b.Year, b.Month, b.Day, 23, 59, 59, 0, loc)
 					if at.Before(since) {
 						gochrome.Log("blog.SaveBlogsSince: found oldest blog")
 						return
