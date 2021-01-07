@@ -70,21 +70,22 @@ var jsBlogs = `
 JSON.stringify({
     pages: [...document.querySelectorAll('.c-pager__item--count a')].map(el => el.href),
     blogs: [...document.querySelectorAll('.p-blog-article')].map(el => {
-		link = el.querySelector('.p-button__blog_detail > a').href;
-		head = el.querySelector('.p-blog-article__head');
-    name = head.querySelector('.c-blog-article__name').textContent.trim();
-		title = head.querySelector('.c-blog-article__title').textContent.trim();
-		t = head.querySelector('.c-blog-article__date').textContent.trim();
-    [year, month, day] = t.split(' ')[0].split('.');
-    return {
-      title: title,
-      name: name,
-      year: parseInt(year),
-      month: parseInt(month),
-      day: parseInt(day),
-      link: link,
-    }
-})})
+		const link = el.querySelector('.p-button__blog_detail > a').href;
+		const head = el.querySelector('.p-blog-article__head');
+    	const name = head.querySelector('.c-blog-article__name').textContent.trim();
+		const title = head.querySelector('.c-blog-article__title').textContent.trim();
+		const t = head.querySelector('.c-blog-article__date').textContent.trim();
+    	[year, month, day] = t.split(' ')[0].split('.');
+		return {
+		  title: title,
+		  name: name,
+		  year: parseInt(year),
+		  month: parseInt(month),
+		  day: parseInt(day),
+		  link: link
+		};
+    })
+})
 `
 
 // blogsFromTab uses jsBlogs to get links and dates of all blogs on a page
