@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -101,7 +102,20 @@ var blogCmd = &cobra.Command{
 			day := today.Day()
 			since = today.AddDate(0, -int(month)+1, -int(day)+1)
 		default:
-			t, err := time.Parse("2006-01-02", saveBlogsSince)
+			var t time.Time
+			var err error
+			if strings.ContainsAny(saveBlogsSince, "-") {
+				t, err = time.Parse("2006-01-02", saveBlogsSince)
+				if err != nil {
+					// the dates on a blog do not have a leading zero so we try this too
+					t, err = time.Parse("2006-1-2", saveBlogsSince)
+				}
+			} else {
+				t, err = time.Parse("2006.01.02", saveBlogsSince)
+				if err != nil {
+					t, err = time.Parse("2006.1.2", saveBlogsSince)
+				}
+			}
 			if err == nil {
 				// parsed a date
 				y, m, d := t.In(loc).Date()
