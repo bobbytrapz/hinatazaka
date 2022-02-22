@@ -11,7 +11,7 @@ There is no support for Windows but there probably will be eventually.
 No releases yet. Use 'go get'.
 
 ```
-go get github.com/bobbytrapz/hinatazaka
+go get bybobby.dev/hinatazaka
 ```
 
 ## Usage
