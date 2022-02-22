@@ -2,7 +2,6 @@ package scrape
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bobbytrapz/chrome"
+	"github.com/bobbytrapz/gochrome"
 	"github.com/bobbytrapz/hinatazaka/options"
 )
 
@@ -51,43 +50,47 @@ type ResJSFloat32 struct {
 }
 
 // SaveImagesFrom a webpage
-func SaveImagesFrom(ctx context.Context, link string, saveImagesTo string, jsCode string) error {
-	tab, err := chrome.ConnectToNewTab(ctx)
+func SaveImagesFrom(ctx context.Context, browser *gochrome.Browser, link string, saveImagesTo string, jsCode string) error {
+	tab, err := browser.NewTab(ctx)
 	if err != nil {
 		return fmt.Errorf("scrape.SaveImagesFrom: %s", err)
 	}
-	defer tab.PageClose()
+	defer tab.Close()
 	SaveImagesFromTabWith(ctx, tab, link, saveImagesTo, jsCode)
 	return nil
 }
 
 // SaveImagesFromTabWith sends given javascript to get urls for images
 // then it downloads each image from a list of comma-separated urls
-func SaveImagesFromTabWith(ctx context.Context, tab chrome.Tab, link string, saveTo string, jsCode string) {
-	tab.PageNavigate(link)
+func SaveImagesFromTabWith(ctx context.Context, tab *gochrome.Tab, link string, saveTo string, jsCode string) {
+	_, err := tab.Goto(link)
+	if err != nil {
+		panic(err)
+	}
 	tab.WaitForLoad(10 * time.Second)
 
-	tab.Command("Runtime.evaluate", chrome.TabParams{
-		"expression": jsCode,
-	})
-	// wait for reponse
-	data := tab.Wait()
-	var res ResJSString
-	err := json.Unmarshal(data, &res)
+	got, err := tab.Evaluate(jsCode)
 	if err != nil {
-		chrome.Log("scrape.SaveImagesFromTabWith: %s", err)
+		panic(err)
 	}
-	chrome.Log("scrape.SaveImagesFromTabWith: res: %+v", res)
+
+	value, ok := got.Result["value"]
+	if !ok {
+		gochrome.Log("scrape.SaveImagesFromTabWith: no images")
+		return
+	}
+	links := value.(string)
+	gochrome.Log("scrape.SaveImagesFromTabWith: links: %+v", links)
 
 	count := 0
-	for _, u := range strings.Split(res.Result.Value, ",") {
+	for _, u := range strings.Split(links, ",") {
 		if u == "" {
 			continue
 		}
 
 		purl, err := url.Parse(u)
 		if err != nil {
-			chrome.Log("scrape.SaveImagesFromTabWith: %s", err)
+			gochrome.Log("scrape.SaveImagesFromTabWith: %s", err)
 			fmt.Println("[nok]", err)
 			continue
 		}
@@ -102,14 +105,14 @@ func SaveImagesFromTabWith(ctx context.Context, tab chrome.Tab, link string, sav
 
 		res, err := httpClient.Do(req)
 		if err != nil {
-			chrome.Log("scrape.SaveImagesFromTabWith: %s", err)
+			gochrome.Log("scrape.SaveImagesFromTabWith: %s", err)
 			fmt.Println("[nok]", err)
 			continue
 		}
 
 		f, err := os.OpenFile(fn, os.O_WRONLY|os.O_CREATE, 0644)
 		if err != nil {
-			chrome.Log("scrape.SaveImagesFromTabWith: %s", err)
+			gochrome.Log("scrape.SaveImagesFromTabWith: %s", err)
 			fmt.Println("[nok]", err)
 			continue
 		}
@@ -117,7 +120,7 @@ func SaveImagesFromTabWith(ctx context.Context, tab chrome.Tab, link string, sav
 		fmt.Println("[save]", fn)
 		_, err = io.Copy(f, res.Body)
 		if err != nil {
-			chrome.Log("scrape.SaveImagesFromTabWith: %s", err)
+			gochrome.Log("scrape.SaveImagesFromTabWith: %s", err)
 			fmt.Println("[nok]", err)
 		}
 		count++

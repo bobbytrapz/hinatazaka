@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bobbytrapz/gochrome"
 	"log"
 	"net/url"
 	"os"
@@ -12,7 +13,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bobbytrapz/chrome"
 	"github.com/bobbytrapz/hinatazaka/options"
 	"github.com/bobbytrapz/hinatazaka/scrape"
 	"github.com/spf13/cobra"
@@ -57,21 +57,18 @@ var webCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
-		if verbose {
-			chrome.Log = log.Printf
-		}
+		browser := gochrome.NewBrowser()
+		browser.UserAgent = options.Get("user_agent")
 
-		chrome.UserAgent = options.Get("user_agent")
-
-		// start chrome
-		if err := chrome.Start(ctx, userProfileDir, port); err != nil {
+		_, err = browser.Start(ctx, gochrome.TemporaryUserProfileDirectory, port)
+		if err != nil {
 			panic(err)
 		}
+		defer browser.Wait()
 
-		// wait for chrome to close
-		defer func() {
-			chrome.Wait()
-		}()
+		if verbose {
+			gochrome.Log = log.Printf
+		}
 
 		var wg sync.WaitGroup
 		for _, u := range urls {
@@ -82,7 +79,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelectorAll('img.size-full')].map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "ray-web.jp":
 				wg.Add(1)
@@ -90,7 +87,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelectorAll('.scale_full > a > img,.top_photo > img')].map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "bisweb.jp":
 				wg.Add(1)
@@ -102,7 +99,7 @@ var webCmd = &cobra.Command{
 						.concat([document.querySelector(".single_kv").style.backgroundImage.slice(5, -2)])
 						.toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "mdpr.jp":
 				wg.Add(1)
@@ -118,7 +115,7 @@ var webCmd = &cobra.Command{
 							return link.slice(0, link.indexOf('?'));
 						}).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "tokyopopline.com":
 				wg.Add(1)
@@ -131,7 +128,7 @@ var webCmd = &cobra.Command{
 						jsCode = `[document.querySelector('main').querySelector(".entry-thumbnail > img"), ...document.querySelectorAll('.gallery-icon > a')].map(el => el.src || el.href).toString()`
 					}
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "taishu.jp":
 				wg.Add(1)
@@ -143,7 +140,7 @@ var webCmd = &cobra.Command{
 					}
 					jsCode := `[...document.querySelectorAll('.swiper-slide > figure > img')].map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "cancam.jp":
 				wg.Add(1)
@@ -151,7 +148,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelectorAll('a')].filter(el => el.href.includes('.jpg')).map(el => el.href).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "jj-jj.net":
 				wg.Add(1)
@@ -159,7 +156,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelectorAll('img')].filter(i => i.width >= 600).map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "news.dwango.jp":
 				wg.Add(1)
@@ -167,7 +164,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelectorAll('.stop-tap > img')].map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "news.mynavi.jp":
 				wg.Add(1)
@@ -175,7 +172,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelectorAll('.photo_table__link')].map(el => el.href.replace('/photo', '')).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "lineblog.me":
 				wg.Add(1)
@@ -183,7 +180,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelectorAll('img.pict')].map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "nonno.hpplus.jp":
 				wg.Add(1)
@@ -191,7 +188,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelectorAll('.article > .part .image figure > div > img')].map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "abematimes.com":
 				wg.Add(1)
@@ -202,7 +199,7 @@ var webCmd = &cobra.Command{
 							return link.includes('?') ? link.slice(0, link.indexOf('?')) : link;
 						}).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "bltweb.jp":
 				wg.Add(1)
@@ -212,7 +209,7 @@ var webCmd = &cobra.Command{
 						.filter(i => i.width >= 300)
 						.map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "image.itmedia.co.jp":
 				wg.Add(1)
@@ -221,7 +218,7 @@ var webCmd = &cobra.Command{
 					jsCode := `[...document.querySelector('#imgThumb_in').querySelectorAll('a')]
 						.map(el => el.href.replace('/l/im', '')).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "ar-mag.jp":
 				wg.Add(1)
@@ -231,7 +228,7 @@ var webCmd = &cobra.Command{
 						.filter(i => i.width >= 300)
 						.map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "www.nikkansports.com":
 				wg.Add(1)
@@ -243,7 +240,7 @@ var webCmd = &cobra.Command{
 						.map(url => url.replace('w500', 'w1300'))
 						.toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "news.line.me":
 				wg.Add(1)
@@ -251,7 +248,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelector('section').querySelectorAll('img')].map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "girlswalker.com":
 				wg.Add(1)
@@ -259,7 +256,7 @@ var webCmd = &cobra.Command{
 					defer wg.Done()
 					jsCode := `[...document.querySelector('.gw-content__entry-article').querySelectorAll('img')].map(el => el.src).toString()`
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			case "thetv.jp":
 				wg.Add(1)
@@ -271,7 +268,7 @@ var webCmd = &cobra.Command{
 							.map(name => 'https://thetv.jp/i/nw/%s/' + name + '.jpg')
 							.toString()`, base)
 					fmt.Printf("Saving all images from %s to %s\n", l, saveWebImagesTo)
-					scrape.SaveImagesFrom(ctx, l, saveWebImagesTo, jsCode)
+					scrape.SaveImagesFrom(ctx, browser, l, saveWebImagesTo, jsCode)
 				}(u.String())
 			default:
 				fmt.Println("We cannot handle:", u.String())
