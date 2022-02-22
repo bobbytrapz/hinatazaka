@@ -11,7 +11,7 @@ There is no support for Windows but there probably will be eventually.
 No releases yet. Use 'go get'.
 
 ```
-go get bybobby.dev/hinatazaka
+go install bybobby.dev/hinatazaka
 ```
 
 ## Usage
