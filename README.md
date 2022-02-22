@@ -8,7 +8,7 @@ There is no support for Windows but there probably will be eventually.
 
 ## Install
 
-No releases yet. Use 'go get'.
+No releases yet. Use 'go install'.
 
 ```
 go install bybobby.dev/hinatazaka
