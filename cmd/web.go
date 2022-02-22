@@ -113,7 +113,7 @@ var webCmd = &cobra.Command{
 						fmt.Println("We need https://mdpr.jp/photo/detail/{num}")
 						return
 					}
-					jsCode := `[...document.querySelectorAll('figure.square > a > img')].map(el => {
+					jsCode := `[...document.querySelectorAll('img.c-image__image, .pg-photo__webImageListLink > img')].map(el => {
 							link = el.src;
 							return link.slice(0, link.indexOf('?'));
 						}).toString()`
