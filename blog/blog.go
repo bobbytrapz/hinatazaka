@@ -95,7 +95,12 @@ func blogsFromTab(tab *gochrome.Tab) (blogsFromPage blogsFromPage, err error) {
 		return
 	}
 
-	err = json.Unmarshal([]byte(res.Result["value"].(string)), &blogsFromPage)
+	value, ok := res.Result["value"].(string)
+	if !ok {
+		return
+	}
+
+	err = json.Unmarshal([]byte(value), &blogsFromPage)
 	if err != nil {
 		return
 	}
