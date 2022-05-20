@@ -4,7 +4,7 @@ This is just a toy project I'm using to check out remote controlling Chrome DevT
 
 Currently not well tested but I'm using it.
 
-There is no support for Windows but there probably will be eventually.
+There is no support for Windows.
 
 ## Install
 
