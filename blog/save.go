@@ -193,7 +193,7 @@ func SaveBlogsOn(ctx context.Context, authorShouldSave map[string]bool, on time.
 	fmt.Println("[visit]", listPage)
 
 	page := pool.Get(createFn)
-	page.MustNavigate(listPage).MustWaitLoad()
+	page.Timeout(WaitForSpiderTimeout).MustNavigate(listPage).MustWaitLoad()
 
 	count := 0
 
