@@ -65,7 +65,7 @@ func SaveBlogsSince(ctx context.Context, root string, since time.Time, saveTo st
 				return nil
 			case link := <-visit:
 				if _, ok := visited.Load(link); ok {
-					return nil
+					continue
 				}
 
 				// we found a page so reset timeout
@@ -82,7 +82,7 @@ func SaveBlogsSince(ctx context.Context, root string, since time.Time, saveTo st
 				if err != nil {
 					// delete so we can maybe try again
 					visited.Delete(link)
-					return err
+					continue
 				}
 
 				// add more pages to visit
@@ -105,7 +105,7 @@ func SaveBlogsSince(ctx context.Context, root string, since time.Time, saveTo st
 					at := time.Date(b.Year, b.Month, b.Day, 23, 59, 59, 0, loc)
 					if at.Before(since) {
 						log.Print("blog.SaveBlogsSince: found oldest blog")
-						return nil
+						break
 					}
 
 					// if there is space between this member's names remove it
@@ -121,8 +121,6 @@ func SaveBlogsSince(ctx context.Context, root string, since time.Time, saveTo st
 					}
 				}
 			}
-
-			return nil
 		}
 	}
 
@@ -142,7 +140,7 @@ func SaveBlogsSince(ctx context.Context, root string, since time.Time, saveTo st
 	visit <- root
 
 	// give spider some time to start
-	<-time.After(WaitForBlogList + WaitForBlogDownload)
+	<-time.After(WaitForBlogDownload)
 
 	wg.Wait()
 
@@ -150,6 +148,10 @@ func SaveBlogsSince(ctx context.Context, root string, since time.Time, saveTo st
 		p.MustClose()
 	})
 
+	visited.Range(func(k, v interface{}) bool {
+		fmt.Println("[visited]", v.(string))
+		return true
+	})
 	fmt.Println("[saved]", count.Load(), "blogs")
 
 	return nil

@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	WaitForBlogList      = 2 * time.Second
-	WaitForBlogDownload  = 10 * time.Second
-	WaitForSpiderTimeout = 30 * time.Second
+	WaitForBlogList      = 1 * time.Minute
+	WaitForBlogDownload  = 1 * time.Minute
+	WaitForSpiderTimeout = 1 * time.Minute
 )
 
 // ShouldDryRun is the context key indicating a dry run
@@ -19,5 +19,5 @@ var UserAgent = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (K
 
 // we use for fetching pages and for remote control of chrome
 var httpClient = http.Client{
-	Timeout: 10 * time.Second,
+	Timeout: 1 * time.Minute,
 }
