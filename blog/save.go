@@ -35,6 +35,7 @@ func SaveBlogsSince(ctx context.Context, root string, since time.Time, saveTo st
 
 	visit := make(chan string)
 	var visited sync.Map
+	var failed sync.Map
 
 	// use tokyo time
 	loc, err := time.LoadLocation("Asia/Tokyo")
@@ -52,11 +53,12 @@ func SaveBlogsSince(ctx context.Context, root string, since time.Time, saveTo st
 
 	var count atomic.Uint64
 
+	timeout := time.NewTimer(WaitForSpiderTimeout)
+
 	job := func() error {
 		page := pool.Get(createFn)
 		defer pool.Put(page)
 
-		timeout := time.NewTimer(WaitForSpiderTimeout)
 		for {
 			select {
 			case <-ctx.Done():
@@ -76,7 +78,12 @@ func SaveBlogsSince(ctx context.Context, root string, since time.Time, saveTo st
 				visited.Store(link, link)
 				log.Printf("blog: visit: %q", link)
 
-				page.MustNavigate(link).MustWaitLoad()
+				err = page.Timeout(WaitForSpiderTimeout).MustNavigate(link).WaitLoad()
+				if err != nil {
+					// delete so we can maybe try again
+					visited.Delete(link)
+					continue
+				}
 
 				blogs, err := getBlogsFromPage(page)
 				if err != nil {
@@ -117,7 +124,7 @@ func SaveBlogsSince(ctx context.Context, root string, since time.Time, saveTo st
 					err = saveBlogFromPage(ctx, page, blogLink, blogTitle, author, at, saveTo)
 					if err != nil {
 						log.Printf("blog.SaveBlogsSince: saveBlogFromPage: %s", err)
-						return err
+						failed.Store(b.Link, b.Link)
 					}
 				}
 			}
@@ -150,6 +157,10 @@ func SaveBlogsSince(ctx context.Context, root string, since time.Time, saveTo st
 
 	visited.Range(func(k, v interface{}) bool {
 		fmt.Println("[visited]", v.(string))
+		return true
+	})
+	failed.Range(func(k, v interface{}) bool {
+		fmt.Println("[failed]", v.(string))
 		return true
 	})
 	fmt.Println("[saved]", count.Load(), "blogs")
